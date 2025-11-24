@@ -80,18 +80,30 @@ if "query_max_context_length" not in st.session_state:
 
 def initialize_components():
     """Initialize AI Lab IGNFA - Legal RAG System and SmartProcessor."""
+    # Ensure session state keys exist
+    if "rag" not in st.session_state:
+        st.session_state.rag = None
+    if "processor" not in st.session_state:
+        st.session_state.processor = None
+    
+    # Initialize if not already initialized
     if st.session_state.rag is None:
-        with st.spinner("Initializing AI Lab IGNFA - Legal RAG System..."):
-            st.session_state.rag = RAGAnything(
-                llm_model=st.session_state.llm_model,
-                llm_temperature=st.session_state.llm_temperature,
-                llm_top_p=st.session_state.llm_top_p,
-                llm_max_tokens=st.session_state.llm_max_tokens,
-            )
-            st.session_state.processor = SmartProcessor(
-                documents_dir="documents",
-                raganything=st.session_state.rag,
-            )
+        try:
+            with st.spinner("Initializing AI Lab IGNFA - Legal RAG System..."):
+                st.session_state.rag = RAGAnything(
+                    llm_model=st.session_state.llm_model,
+                    llm_temperature=st.session_state.llm_temperature,
+                    llm_top_p=st.session_state.llm_top_p,
+                    llm_max_tokens=st.session_state.llm_max_tokens,
+                )
+                st.session_state.processor = SmartProcessor(
+                    documents_dir="documents",
+                    raganything=st.session_state.rag,
+                )
+        except Exception as e:
+            st.error(f"❌ Failed to initialize RAG system: {str(e)}")
+            st.info("💡 Please check your configuration and API keys in Settings → Secrets or .env file")
+            st.stop()
 
 
 def main():
