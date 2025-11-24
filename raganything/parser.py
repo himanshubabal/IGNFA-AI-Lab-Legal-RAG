@@ -65,6 +65,7 @@ class MinerUParser(BaseParser):
         backend: str = "pipeline",
         source: str = "huggingface",
         vlm_url: Optional[str] = None,
+        output_flag_span: Optional[bool] = None,
         **kwargs: Any
     ) -> Dict[str, Any]:
         """

@@ -91,6 +91,7 @@ class RAGAnything:
         file_path: str,
         output_dir: Optional[str] = None,
         doc_id: Optional[str] = None,
+        output_flag_span: Optional[bool] = None,
         **parser_kwargs: Any
     ) -> Dict[str, Any]:
         """
@@ -130,6 +131,7 @@ class RAGAnything:
         doc_id: Optional[str] = None,
         display_stats: bool = True,
         split_by_character: Optional[str] = None,
+        output_flag_span: Optional[bool] = None,
         **parser_kwargs: Any
     ) -> Dict[str, Any]:
         """

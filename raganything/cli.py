@@ -56,6 +56,18 @@ def main():
         action="store_true",
         help="Force reprocess all documents",
     )
+    parser.add_argument(
+        "--output-flag-span",
+        action="store_true",
+        default=None,
+        help="Output verification files (span.pdf, layout.pdf, etc.) - enabled by default",
+    )
+    parser.add_argument(
+        "--no-output-flag-span",
+        action="store_false",
+        dest="output_flag_span",
+        help="Disable output of verification files",
+    )
 
     args = parser.parse_args()
 

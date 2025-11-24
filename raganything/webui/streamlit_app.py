@@ -192,6 +192,11 @@ def main():
 
         if st.button("🔄 Reinitialize RAG"):
             with st.spinner("Reinitializing..."):
+                # Get output_flag_span setting if using mineru
+                parser_kwargs = {}
+                if parser == "mineru" and "output_flag_span" in locals():
+                    parser_kwargs["output_flag_span"] = output_flag_span
+                
                 st.session_state.rag = RAGAnything(
                     parser=parser,
                     parse_method=parse_method,
@@ -206,6 +211,9 @@ def main():
                     documents_dir="documents",
                     raganything=st.session_state.rag,
                 )
+                # Store output_flag_span in session state for use during processing
+                if parser == "mineru":
+                    st.session_state.output_flag_span = output_flag_span
             st.success("RAG-Anything reinitialized!")
             st.rerun()
 
@@ -519,17 +527,23 @@ def main():
                 with col1:
                     st.write(f"📄 {Path(doc['path']).name}")
                 with col2:
-                    if st.button("▶️ Process", key=f"process_{doc['path']}"):
-                        with st.spinner("Processing..."):
-                            try:
-                                result = st.session_state.rag.process_document_complete(
-                                    file_path=doc["path"],
-                                    doc_id=Path(doc["path"]).stem,
-                                )
-                                st.success("Processed!")
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Error: {str(e)}")
+                           if st.button("▶️ Process", key=f"process_{doc['path']}"):
+                               with st.spinner("Processing..."):
+                                   try:
+                                       # Use output_flag_span from session state if available
+                                       process_kwargs = {}
+                                       if st.session_state.get("output_flag_span") is not None:
+                                           process_kwargs["output_flag_span"] = st.session_state.output_flag_span
+                                       
+                                       result = st.session_state.rag.process_document_complete(
+                                           file_path=doc["path"],
+                                           doc_id=Path(doc["path"]).stem,
+                                           **process_kwargs
+                                       )
+                                       st.success("Processed!")
+                                       st.rerun()
+                                   except Exception as e:
+                                       st.error(f"Error: {str(e)}")
 
     with tab3:
         st.header("📊 Detailed Status")
