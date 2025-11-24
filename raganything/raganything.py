@@ -163,7 +163,12 @@ class RAGAnything:
                 f.write(content)
             result["output_file"] = str(extracted_file)
             result["extracted_file"] = str(extracted_file)
-            print(f"💾 Saved extracted content to: {extracted_file.relative_to(base_output_dir)}", flush=True)
+            # Show relative path for user-friendly output
+            try:
+                rel_path = extracted_file.relative_to(base_output_dir.resolve())
+                print(f"💾 Saved extracted content to: {rel_path}", flush=True)
+            except ValueError:
+                print(f"💾 Saved extracted content to: {extracted_file.name}", flush=True)
 
         # Add document ID if provided
         if doc_id:
