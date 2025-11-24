@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "RAG-Anything Contributors"}
+    {name = "AI Lab IGNFA"}
 ]
 keywords = ["rag", "retrieval-augmented-generation", "multimodal", "document-processing", "nlp", "llm"]
 classifiers = [
