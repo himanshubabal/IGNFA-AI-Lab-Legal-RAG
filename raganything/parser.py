@@ -321,7 +321,7 @@ class ParserFactory:
                     "Install MinerU with: pip install magic-pdf"
                 )
                 # Fall back to Docling if MinerU is not available
-                return DoclingParser(parse_method=parse_method)
+                return DoclingParser()
             return MinerUParser(parse_method=parse_method)
         elif parser_type == "docling":
             return DoclingParser(parse_method=parse_method)
