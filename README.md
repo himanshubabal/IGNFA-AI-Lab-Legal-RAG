@@ -23,10 +23,14 @@ RAG-Anything is a comprehensive framework for processing multimodal documents (P
 git clone <repository-url>
 cd RAG-Alt
 
-# Install dependencies
-pip install -r requirements.txt
+# Set up Python 3.12 virtual environment (recommended)
+./setup_venv.sh
 
-# Install package in development mode
+# Or manually:
+python3.12 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
 pip install -e .
 ```
 
