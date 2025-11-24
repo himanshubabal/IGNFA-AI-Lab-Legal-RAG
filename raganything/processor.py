@@ -322,11 +322,25 @@ class ChromaVectorStore(BaseVectorStore):
             return []
 
         # Search in collection
-        results = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=n_results,
-            **kwargs
-        )
+        try:
+            results = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=n_results,
+                **kwargs
+            )
+        except Exception as e:
+            error_msg = str(e)
+            # Check for ChromaDB metadata corruption errors
+            if "Missing metadata" in error_msg or "metadata segment" in error_msg.lower():
+                logger.error(f"ChromaDB metadata corruption detected during search: {e}")
+                raise RuntimeError(
+                    f"ChromaDB collection metadata is corrupted: {error_msg}\n"
+                    "This usually happens after ChromaDB version updates or database corruption.\n"
+                    "Please reset the database with: python -m raganything.cli reset\n"
+                    "This will clear all embeddings and allow you to reprocess your documents."
+                ) from e
+            # Re-raise other errors
+            raise
 
         # Format results
         formatted_results = []
