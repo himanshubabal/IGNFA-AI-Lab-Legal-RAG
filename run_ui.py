@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Launch script for RAG-Anything Web UI.
+Launch script for AI Lab IGNFA - Legal RAG System Web UI.
 
 This script launches the Streamlit web interface with automatic
 document processing on startup.
@@ -21,12 +21,12 @@ from raganything import RAGAnything
 def main():
     """Launch web UI with automatic processing."""
     print("=" * 60)
-    print("RAG-Anything Web UI")
+    print("AI Lab IGNFA - Legal RAG System Web UI")
     print("=" * 60)
     print()
 
     # Initialize and process documents
-    print("Initializing RAG-Anything...")
+    print("Initializing AI Lab IGNFA - Legal RAG System...")
     rag = RAGAnything()
     processor = SmartProcessor(documents_dir="documents", raganything=rag)
 

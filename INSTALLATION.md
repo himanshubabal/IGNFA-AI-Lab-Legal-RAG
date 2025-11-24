@@ -4,7 +4,7 @@
 
 **Recommended: Python 3.11 or 3.12**
 
-RAG-Anything is designed to work with Python 3.11 or 3.12. Some dependencies (notably ChromaDB's `onnxruntime`) may not be available for newer Python versions (e.g., Python 3.14).
+AI Lab IGNFA - Legal RAG System is designed to work with Python 3.11 or 3.12. Some dependencies (notably ChromaDB's `onnxruntime`) may not be available for newer Python versions (e.g., Python 3.14).
 
 ### Installing Python 3.11
 

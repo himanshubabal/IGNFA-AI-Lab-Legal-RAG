@@ -1,5 +1,5 @@
 """
-Streamlit Community Cloud entry point for RAG-Anything.
+Streamlit Community Cloud entry point for AI Lab IGNFA - Legal RAG System.
 
 This file serves as the entry point for Streamlit Community Cloud deployment.
 

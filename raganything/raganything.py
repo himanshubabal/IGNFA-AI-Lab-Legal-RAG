@@ -1,5 +1,5 @@
 """
-Main RAGAnything class - orchestrator for RAG-Anything framework.
+Main RAGAnything class - orchestrator for AI Lab IGNFA - Legal RAG System.
 
 This module provides the main interface for document processing,
 content management, and querying.
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class RAGAnything:
-    """Main RAG-Anything orchestrator class."""
+    """Main AI Lab IGNFA - Legal RAG System orchestrator class."""
 
     def __init__(
         self,

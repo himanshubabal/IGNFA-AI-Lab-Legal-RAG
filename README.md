@@ -1,6 +1,6 @@
-# RAG-Anything: All-in-One RAG Framework
+# AI Lab IGNFA - Legal RAG System
 
-RAG-Anything is a comprehensive framework for processing multimodal documents (PDFs, Office documents, images, tables, equations) and enabling semantic search and Q&A over the extracted content.
+AI Lab IGNFA - Legal RAG System is a comprehensive framework for processing legal documents (PDFs, Office documents, images, tables, equations) and enabling semantic search and Q&A over the extracted content.
 
 ## Features
 
@@ -61,7 +61,7 @@ For Office document support, install LibreOffice:
 ```python
 from raganything import RAGAnything
 
-# Initialize RAG-Anything
+# Initialize AI Lab IGNFA - Legal RAG System
 rag = RAGAnything(
     parser="mineru",  # or "docling"
     parse_method="auto",

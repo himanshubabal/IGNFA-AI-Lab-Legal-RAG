@@ -1,2 +1,2 @@
-"""Test suite for RAG-Anything."""
+"""Test suite for AI Lab IGNFA - Legal RAG System."""
 

@@ -3,7 +3,7 @@
 
 set -e
 
-echo "Setting up Python virtual environment for RAG-Anything..."
+echo "Setting up Python virtual environment for AI Lab IGNFA - Legal RAG System..."
 
 # Check for Python 3.11 (preferred) or 3.12
 if command -v python3.11 &> /dev/null; then
@@ -51,7 +51,7 @@ echo "Installing dependencies..."
 pip install -r requirements.txt
 
 # Install package in development mode
-echo "Installing RAG-Anything in development mode..."
+echo "Installing AI Lab IGNFA - Legal RAG System in development mode..."
 pip install -e .
 
 echo ""

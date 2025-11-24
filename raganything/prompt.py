@@ -1,5 +1,5 @@
 """
-Prompt templates for LLM interactions in RAG-Anything.
+Prompt templates for LLM interactions in AI Lab IGNFA - Legal RAG System.
 
 This module provides prompt templates for query processing,
 context formatting, and system prompts.

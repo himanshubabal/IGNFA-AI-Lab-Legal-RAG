@@ -1,5 +1,5 @@
 """
-Command-line interface for RAG-Anything.
+Command-line interface for AI Lab IGNFA - Legal RAG System.
 """
 
 import argparse
@@ -13,7 +13,7 @@ from raganything.smart_processor import SmartProcessor
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        description="RAG-Anything: All-in-One RAG Framework"
+        description="AI Lab IGNFA - Legal RAG System"
     )
     parser.add_argument(
         "command",

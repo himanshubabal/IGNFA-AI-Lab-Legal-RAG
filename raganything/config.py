@@ -1,5 +1,5 @@
 """
-Configuration management for RAG-Anything.
+Configuration management for AI Lab IGNFA - Legal RAG System.
 
 This module handles loading and managing configuration from environment
 variables and provides a centralized configuration interface.
@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 
 class Config:
-    """Configuration manager for RAG-Anything."""
+    """Configuration manager for AI Lab IGNFA - Legal RAG System."""
 
     _instance: Optional["Config"] = None
     _initialized: bool = False

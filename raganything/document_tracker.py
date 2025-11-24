@@ -1,5 +1,5 @@
 """
-Document tracking system for RAG-Anything.
+Document tracking system for AI Lab IGNFA - Legal RAG System.
 
 Tracks which documents have been processed, their metadata,
 and manages document lifecycle (add, update, remove).

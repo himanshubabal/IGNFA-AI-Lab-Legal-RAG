@@ -1,5 +1,5 @@
 """
-Query and retrieval functionality for RAG-Anything.
+Query and retrieval functionality for AI Lab IGNFA - Legal RAG System.
 
 This module handles semantic search, context retrieval,
 and LLM integration for answer generation.

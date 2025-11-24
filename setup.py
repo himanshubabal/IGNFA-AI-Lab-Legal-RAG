@@ -1,4 +1,4 @@
-"""Setup script for RAG-Anything package."""
+"""Setup script for AI Lab IGNFA - Legal RAG System package."""
 
 from setuptools import setup, find_packages
 
@@ -12,9 +12,9 @@ except FileNotFoundError:
 setup(
     name="raganything",
     version="0.1.0",
-    author="RAG-Anything Contributors",
+    author="AI Lab IGNFA",
     author_email="",
-    description="All-in-One RAG Framework for Multimodal Document Processing",
+    description="AI Lab IGNFA - Legal RAG System: Legal Document Processing and Q&A System",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/HKUDS/RAG-Anything",

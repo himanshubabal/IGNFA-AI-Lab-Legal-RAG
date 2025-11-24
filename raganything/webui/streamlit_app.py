@@ -1,5 +1,5 @@
 """
-Enhanced Streamlit web UI for RAG-Anything with document management.
+Enhanced Streamlit web UI for AI Lab IGNFA - Legal RAG System with document management.
 
 This module provides a comprehensive web interface for document processing,
 querying, and management using Streamlit.
@@ -47,7 +47,7 @@ except ImportError:
 
 # Page configuration
 st.set_page_config(
-    page_title="RAG-Anything",
+    page_title="AI Lab IGNFA - Legal RAG System",
     page_icon="📚",
     layout="wide",
 )
@@ -81,7 +81,7 @@ if "query_max_context_length" not in st.session_state:
 def initialize_components():
     """Initialize RAG-Anything and SmartProcessor."""
     if st.session_state.rag is None:
-        with st.spinner("Initializing RAG-Anything..."):
+        with st.spinner("Initializing AI Lab IGNFA - Legal RAG System..."):
             st.session_state.rag = RAGAnything(
                 llm_model=st.session_state.llm_model,
                 llm_temperature=st.session_state.llm_temperature,
@@ -96,8 +96,8 @@ def initialize_components():
 
 def main():
     """Main Streamlit app."""
-    st.title("📚 RAG-Anything")
-    st.markdown("All-in-One RAG Framework for Multimodal Document Processing")
+    st.title("📚 AI Lab IGNFA - Legal RAG System")
+    st.markdown("Legal Document Processing and Q&A System")
 
     # Initialize components
     initialize_components()
@@ -263,7 +263,7 @@ def main():
                     documents_dir="documents",
                     raganything=st.session_state.rag,
                 )
-            st.success("RAG-Anything reinitialized!")
+            st.success("AI Lab IGNFA - Legal RAG System reinitialized!")
             st.rerun()
 
         st.divider()

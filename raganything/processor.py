@@ -1,5 +1,5 @@
 """
-Content processor for RAG-Anything.
+Content processor for AI Lab IGNFA - Legal RAG System.
 
 This module handles text chunking, vector embedding generation,
 and vector store integration.
@@ -392,7 +392,7 @@ class ChromaVectorStore(BaseVectorStore):
 
 
 class ContentProcessor:
-    """Main content processor for RAG-Anything."""
+    """Main content processor for AI Lab IGNFA - Legal RAG System."""
 
     def __init__(
         self,

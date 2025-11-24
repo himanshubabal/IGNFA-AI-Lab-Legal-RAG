@@ -1,5 +1,5 @@
 """
-Document parser abstraction layer for RAG-Anything.
+Document parser abstraction layer for AI Lab IGNFA - Legal RAG System.
 
 This module provides a unified interface for different document parsers
 (MinerU, Docling) and handles parser selection and output standardization.

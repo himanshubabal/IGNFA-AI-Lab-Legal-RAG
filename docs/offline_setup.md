@@ -1,10 +1,10 @@
 # Offline Setup Guide
 
-This guide explains how to set up and use RAG-Anything in offline environments.
+This guide explains how to set up and use AI Lab IGNFA - Legal RAG System in offline environments.
 
 ## Overview
 
-RAG-Anything can be configured to work offline by using local models and avoiding cloud-based services where possible.
+AI Lab IGNFA - Legal RAG System can be configured to work offline by using local models and avoiding cloud-based services where possible.
 
 ## Local Embedding Models
 
