@@ -272,18 +272,18 @@ def main():
                             if hasattr(st.session_state.rag.processor, 'vector_store') and st.session_state.rag.processor.vector_store:
                                 st.session_state.rag.processor.vector_store.delete()
                             
-                    # Clear document tracker
-                    st.session_state.processor.tracker.clear()
-                    # Verify tracker file exists after clear
-                    tracker_file = st.session_state.processor.tracker.tracker_file
-                    if not tracker_file.exists():
-                        # Recreate tracker file
-                        st.session_state.processor.tracker._save_tracker()
-                    
-                    st.success("✅ All data cleared! Vector store and document tracker reset.")
-                    st.info(f"📄 Tracker file: {tracker_file}")
-                    st.session_state.confirm_reset = False
-                    st.rerun()
+                            # Clear document tracker
+                            st.session_state.processor.tracker.clear()
+                            # Verify tracker file exists after clear
+                            tracker_file = st.session_state.processor.tracker.tracker_file
+                            if not tracker_file.exists():
+                                # Recreate tracker file
+                                st.session_state.processor.tracker._save_tracker()
+                            
+                            st.success("✅ All data cleared! Vector store and document tracker reset.")
+                            st.info(f"📄 Tracker file: {tracker_file}")
+                            st.session_state.confirm_reset = False
+                            st.rerun()
                         except Exception as e:
                             st.error(f"Error during reset: {str(e)}")
                 else:
