@@ -14,6 +14,8 @@ from raganything.config import get_config, Config
 from raganything.parser import ParserFactory, MinerUParser, DoclingParser
 from raganything.processor import ContentProcessor, TextChunker, EmbeddingGenerator
 from raganything.query import RAGQuery
+from raganything.smart_processor import SmartProcessor
+from raganything.document_tracker import DocumentTracker
 from raganything.modalprocessors import (
     ImageProcessor,
     TableProcessor,
@@ -33,6 +35,8 @@ __all__ = [
     "TextChunker",
     "EmbeddingGenerator",
     "RAGQuery",
+    "SmartProcessor",
+    "DocumentTracker",
     "ImageProcessor",
     "TableProcessor",
     "EquationProcessor",
