@@ -80,21 +80,46 @@ if "query_max_context_length" not in st.session_state:
 
 def initialize_components():
     """Initialize AI Lab IGNFA - Legal RAG System and SmartProcessor."""
-    # Ensure session state keys exist
+    # Ensure all session state keys exist before using them
+    config = get_config()
+    
+    # Initialize all session state variables with defaults if not present
     if "rag" not in st.session_state:
         st.session_state.rag = None
     if "processor" not in st.session_state:
         st.session_state.processor = None
+    if "llm_model" not in st.session_state:
+        st.session_state.llm_model = config.llm_model
+    if "llm_temperature" not in st.session_state:
+        st.session_state.llm_temperature = config.llm_temperature
+    if "llm_top_p" not in st.session_state:
+        st.session_state.llm_top_p = config.llm_top_p
+    if "llm_max_tokens" not in st.session_state:
+        st.session_state.llm_max_tokens = config.llm_max_tokens
+    if "auto_process" not in st.session_state:
+        st.session_state.auto_process = True
+    if "embedding_model" not in st.session_state:
+        st.session_state.embedding_model = getattr(config, 'embedding_model', 'text-embedding-3-small')
+    if "query_n_results" not in st.session_state:
+        st.session_state.query_n_results = config.query_n_results
+    if "query_max_context_length" not in st.session_state:
+        st.session_state.query_max_context_length = config.query_max_context_length
     
     # Initialize if not already initialized
     if st.session_state.rag is None:
         try:
             with st.spinner("Initializing AI Lab IGNFA - Legal RAG System..."):
+                # Use session state values, with fallback to config if somehow still None
+                llm_model = st.session_state.llm_model or config.llm_model
+                llm_temperature = st.session_state.llm_temperature if st.session_state.llm_temperature is not None else config.llm_temperature
+                llm_top_p = st.session_state.llm_top_p if st.session_state.llm_top_p is not None else config.llm_top_p
+                llm_max_tokens = st.session_state.llm_max_tokens if st.session_state.llm_max_tokens is not None else config.llm_max_tokens
+                
                 st.session_state.rag = RAGAnything(
-                    llm_model=st.session_state.llm_model,
-                    llm_temperature=st.session_state.llm_temperature,
-                    llm_top_p=st.session_state.llm_top_p,
-                    llm_max_tokens=st.session_state.llm_max_tokens,
+                    llm_model=llm_model,
+                    llm_temperature=llm_temperature,
+                    llm_top_p=llm_top_p,
+                    llm_max_tokens=llm_max_tokens,
                 )
                 st.session_state.processor = SmartProcessor(
                     documents_dir="documents",
@@ -103,6 +128,8 @@ def initialize_components():
         except Exception as e:
             st.error(f"❌ Failed to initialize RAG system: {str(e)}")
             st.info("💡 Please check your configuration and API keys in Settings → Secrets or .env file")
+            import traceback
+            st.code(traceback.format_exc())
             st.stop()
 
 
