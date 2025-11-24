@@ -13,6 +13,7 @@ from raganything.config import get_config
 from raganything.prompt import (
     get_query_prompt,
     get_system_prompt,
+    get_custom_prompt,
     ContextFormatter,
 )
 
@@ -52,6 +53,7 @@ class RAGQuery:
         self.top_p = top_p
         self.max_tokens = max_tokens
         self._client = None
+        self.custom_prompt_file: Optional[str] = None
 
     def _get_client(self):
         """Get or create OpenAI client."""
@@ -199,7 +201,15 @@ class RAGQuery:
 
         # Get prompts
         if system_prompt is None:
-            system_prompt = get_system_prompt()
+            # Try to load custom prompt from file
+            custom_prompt = get_custom_prompt(
+                prompt_file=self.custom_prompt_file,
+                fallback=None
+            )
+            if custom_prompt:
+                system_prompt = custom_prompt
+            else:
+                system_prompt = get_system_prompt()
 
         user_prompt = get_query_prompt(query=query, context=context, template=query_template)
 

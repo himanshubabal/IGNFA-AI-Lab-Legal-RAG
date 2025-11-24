@@ -117,6 +117,9 @@ LLM_MAX_TOKENS=2000            # Maximum tokens in response (optional)
 QUERY_N_RESULTS=5              # Number of context chunks to retrieve
 QUERY_MAX_CONTEXT_LENGTH=2000  # Maximum context length in characters
 
+# Prompt Configuration
+PROMPT_FILE=prompt.md          # Path to custom system prompt file (optional)
+
 # Output Configuration
 OUTPUT_DIR=./output             # Default: ./output
 

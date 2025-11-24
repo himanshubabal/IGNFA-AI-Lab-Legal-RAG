@@ -14,9 +14,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import streamlit as st
-from raganything import RAGAnything
+from raganything import RAGAnything, get_config
 from raganything.smart_processor import SmartProcessor
 from raganything.document_tracker import DocumentTracker
+from raganything.prompt import load_prompt_from_file, get_system_prompt
 
 # Page configuration
 st.set_page_config(
@@ -203,6 +204,64 @@ def main():
                     f"{len(results['removed'])} removed"
                 )
                 st.rerun()
+
+        st.divider()
+        
+        # Custom Prompt Configuration
+        st.subheader("📝 Custom Prompt")
+        config = get_config()
+        prompt_file_path = config.prompt_file_path or Path("prompt.md")
+        
+        # Load current prompt
+        current_prompt = None
+        if prompt_file_path.exists():
+            try:
+                current_prompt = prompt_file_path.read_text(encoding="utf-8")
+            except Exception as e:
+                st.error(f"Error reading prompt file: {e}")
+        else:
+            # Show default prompt
+            current_prompt = get_system_prompt()
+            st.info(f"Using default prompt. Create `{prompt_file_path.name}` to customize.")
+        
+        if current_prompt:
+            with st.expander("📄 View/Edit Custom Prompt", expanded=False):
+                edited_prompt = st.text_area(
+                    "Edit prompt (saved to prompt.md)",
+                    value=current_prompt,
+                    height=300,
+                    help="Edit the system prompt. Save to apply changes.",
+                    key="prompt_editor"
+                )
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("💾 Save Prompt"):
+                        try:
+                            prompt_file_path.write_text(edited_prompt, encoding="utf-8")
+                            st.success(f"Prompt saved to {prompt_file_path.name}")
+                            # Reload RAG instance to use new prompt
+                            if st.session_state.rag:
+                                st.session_state.rag.query_handler.custom_prompt_file = str(prompt_file_path)
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error saving prompt: {e}")
+                
+                with col2:
+                    if st.button("🔄 Reload Prompt"):
+                        if prompt_file_path.exists():
+                            try:
+                                new_prompt = prompt_file_path.read_text(encoding="utf-8")
+                                if st.session_state.rag:
+                                    st.session_state.rag.query_handler.custom_prompt_file = str(prompt_file_path)
+                                st.success("Prompt reloaded!")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error reloading prompt: {e}")
+                
+                st.caption(f"📁 File: {prompt_file_path}")
+                if not prompt_file_path.exists():
+                    st.warning(f"File `{prompt_file_path.name}` will be created when you save.")
 
     # Main content area - Chat tab first (default)
     tab1, tab2, tab3 = st.tabs(["💬 Chat", "📄 Documents", "📊 Status"])

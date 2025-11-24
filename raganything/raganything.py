@@ -78,6 +78,10 @@ class RAGAnything:
             max_tokens=llm_max_tokens if llm_max_tokens is not None else self.config.llm_max_tokens,
         )
         
+        # Set custom prompt file if configured
+        if self.config.prompt_file_path and self.config.prompt_file_path.exists():
+            self.query_handler.custom_prompt_file = str(self.config.prompt_file_path)
+        
         # Store config for query method
         self.default_n_results = self.config.query_n_results
         self.default_max_context_length = self.config.query_max_context_length

@@ -5,7 +5,11 @@ This module provides prompt templates for query processing,
 context formatting, and system prompts.
 """
 
+import logging
+from pathlib import Path
 from typing import List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class PromptTemplate:
@@ -212,4 +216,58 @@ def get_system_prompt(template: Optional[str] = None) -> str:
     """
     prompt_template = SystemPromptTemplate(template) if template else default_system_template
     return prompt_template.get_system_prompt()
+
+
+def load_prompt_from_file(file_path: str) -> Optional[str]:
+    """
+    Load prompt from a markdown file.
+
+    Args:
+        file_path: Path to prompt file (e.g., prompt.md)
+
+    Returns:
+        Prompt content as string, or None if file doesn't exist
+    """
+    prompt_path = Path(file_path)
+    
+    # Try absolute path first
+    if not prompt_path.exists():
+        # Try relative to current directory
+        prompt_path = Path.cwd() / file_path
+    
+    # Try relative to project root
+    if not prompt_path.exists():
+        prompt_path = Path(__file__).parent.parent / file_path
+    
+    if prompt_path.exists():
+        try:
+            with open(prompt_path, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+                logger.info(f"Loaded custom prompt from: {prompt_path}")
+                return content
+        except Exception as e:
+            logger.error(f"Error loading prompt file {prompt_path}: {e}")
+            return None
+    
+    logger.warning(f"Prompt file not found: {file_path}")
+    return None
+
+
+def get_custom_prompt(prompt_file: Optional[str] = None, fallback: Optional[str] = None) -> Optional[str]:
+    """
+    Get custom prompt from file or return fallback.
+
+    Args:
+        prompt_file: Path to prompt file (e.g., prompt.md)
+        fallback: Fallback prompt if file not found
+
+    Returns:
+        Custom prompt string, or fallback, or None
+    """
+    if prompt_file:
+        custom_prompt = load_prompt_from_file(prompt_file)
+        if custom_prompt:
+            return custom_prompt
+    
+    return fallback
 
