@@ -135,9 +135,27 @@ def main():
         )
         
         if args.extract_only:
-            print(f"\n✅ Text extraction complete for all documents.")
-            print(f"   Extracted files saved in output directory.")
-            print(f"   Run without --extract-only to process chunks and embeddings.")
+            print("\n" + "=" * 60)
+            print("Extraction Summary")
+            print("=" * 60)
+            total_docs = len(results.get("new", [])) + len(results.get("updated", []))
+            successful = total_docs - len(results.get("errors", []))
+            failed = len(results.get("errors", []))
+            
+            print(f"Total documents: {total_docs}")
+            print(f"✅ Successfully extracted: {successful}")
+            if failed > 0:
+                print(f"❌ Failed: {failed}")
+                print("\nErrors:")
+                for error in results.get("errors", []):
+                    print(f"  - {Path(error['path']).name}: {error.get('error', 'Unknown error')}")
+            
+            if successful > 0:
+                print(f"\n✅ Extracted files saved in output directory.")
+                print(f"   Run without --extract-only to process chunks and embeddings.")
+            
+            if failed > 0:
+                sys.exit(1)
             sys.exit(0)
 
         print("\n" + "=" * 60)
