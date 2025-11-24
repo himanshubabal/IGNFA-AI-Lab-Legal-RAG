@@ -233,8 +233,8 @@ def main():
             with st.spinner("Reinitializing..."):
                 # Get output_flag_span setting if using mineru
                 parser_kwargs = {}
-                if parser == "mineru" and "output_flag_span" in locals():
-                    parser_kwargs["output_flag_span"] = output_flag_span
+                if parser == "mineru" and "output_flag_span" in st.session_state:
+                    parser_kwargs["output_flag_span"] = st.session_state.output_flag_span
                 
                 st.session_state.rag = RAGAnything(
                     parser=parser,
@@ -245,14 +245,12 @@ def main():
                     llm_temperature=st.session_state.llm_temperature,
                     llm_top_p=st.session_state.llm_top_p,
                     llm_max_tokens=st.session_state.llm_max_tokens,
+                    **parser_kwargs
                 )
                 st.session_state.processor = SmartProcessor(
                     documents_dir="documents",
                     raganything=st.session_state.rag,
                 )
-                # Store output_flag_span in session state for use during processing
-                if parser == "mineru":
-                    st.session_state.output_flag_span = output_flag_span
             st.success("RAG-Anything reinitialized!")
             st.rerun()
 
