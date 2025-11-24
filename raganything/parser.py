@@ -314,9 +314,17 @@ class ParserFactory:
         parser_type = parser_type.lower()
 
         if parser_type == "mineru":
+            # Check if MinerU is available
+            if not ParserFactory.check_mineru_available():
+                logger.warning(
+                    "MinerU not found. Falling back to Docling parser. "
+                    "Install MinerU with: pip install magic-pdf"
+                )
+                # Fall back to Docling if MinerU is not available
+                return DoclingParser(parse_method=parse_method)
             return MinerUParser(parse_method=parse_method)
         elif parser_type == "docling":
-            return DoclingParser()
+            return DoclingParser(parse_method=parse_method)
         else:
             raise ValueError(f"Unknown parser type: {parser_type}. Use 'mineru' or 'docling'")
 
