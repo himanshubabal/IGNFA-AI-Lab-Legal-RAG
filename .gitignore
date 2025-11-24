@@ -44,8 +44,6 @@ ENV/
 !.env.example
 .streamlit/secrets.toml
 !.streamlit/secrets.toml.example
-.env.example
-.streamlit/secrets.toml
 
 # Output directories
 output/*
