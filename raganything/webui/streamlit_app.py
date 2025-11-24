@@ -225,14 +225,27 @@ def main():
         )
         st.session_state.auto_process = auto_process
 
-        if st.button("🔄 Process All Documents"):
+        st.divider()
+        st.header("🔄 Process Documents")
+        
+        # Force reprocess option
+        force_reprocess = st.checkbox(
+            "Force reprocess all documents",
+            value=False,
+            help="If checked, all documents will be reprocessed even if unchanged",
+        )
+        
+        if st.button("🔄 Process All Documents", type="primary"):
             with st.spinner("Processing all documents..."):
-                results = st.session_state.processor.process_all()
+                results = st.session_state.processor.process_all(force_reprocess=force_reprocess)
                 st.success(
                     f"Processed: {len(results['new'])} new, "
                     f"{len(results['updated'])} updated, "
+                    f"{len(results['unchanged'])} unchanged, "
                     f"{len(results['removed'])} removed"
                 )
+                if results.get('errors'):
+                    st.warning(f"Errors: {len(results['errors'])} documents had errors")
                 st.rerun()
 
         st.divider()
@@ -411,10 +424,21 @@ def main():
 
         with col2:
             st.subheader("Quick Actions")
+            force_reprocess_quick = st.checkbox(
+                "Force reprocess",
+                value=False,
+                key="force_reprocess_quick",
+                help="Reprocess all documents even if unchanged",
+            )
             if st.button("🔄 Refresh & Process"):
                 with st.spinner("Scanning and processing..."):
-                    results = st.session_state.processor.process_all()
-                    st.success("Processing complete!")
+                    results = st.session_state.processor.process_all(force_reprocess=force_reprocess_quick)
+                    st.success(
+                        f"Processing complete! "
+                        f"New: {len(results['new'])}, "
+                        f"Updated: {len(results['updated'])}, "
+                        f"Unchanged: {len(results['unchanged'])}"
+                    )
                     st.rerun()
 
             if st.button("📊 Refresh Status"):
