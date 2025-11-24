@@ -309,7 +309,11 @@ def main():
         
         if st.button("🔄 Process All Documents", type="primary"):
             with st.spinner("Processing all documents..."):
-                results = st.session_state.processor.process_all(force_reprocess=force_reprocess)
+                results = st.session_state.processor.process_all(
+                    force_reprocess=force_reprocess,
+                    extract_only=st.session_state.get("extract_only", False),
+                    force_extract=st.session_state.get("force_extract", False),
+                )
                 st.success(
                     f"Processed: {len(results['new'])} new, "
                     f"{len(results['updated'])} updated, "

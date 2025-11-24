@@ -92,16 +92,25 @@ def main():
         rag = RAGAnything(parser=args.parser)
         tracker = DocumentTracker()
         
-        # Pass output_flag_span if specified
+        # Pass options to process_document_complete
         parser_kwargs = {}
         if args.output_flag_span is not None and args.parser == "mineru":
             parser_kwargs["output_flag_span"] = args.output_flag_span
+        if args.extract_only:
+            parser_kwargs["extract_only"] = True
+        if args.force_extract:
+            parser_kwargs["skip_if_extracted_exists"] = False
         
         result = rag.process_document_complete(
             file_path=args.file, 
             output_dir=args.output_dir,
             **parser_kwargs
         )
+        
+        if args.extract_only:
+            print(f"✅ Text extraction complete. Extracted file saved.")
+            print(f"   Run without --extract-only to process chunks and embeddings.")
+            sys.exit(0)
         
         # Update document tracker
         num_chunks = result.get('num_chunks', 0)

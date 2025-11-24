@@ -124,6 +124,8 @@ class SmartProcessor:
         self,
         force_reprocess: bool = False,
         remove_missing: bool = True,
+        extract_only: bool = False,
+        force_extract: bool = False,
     ) -> Dict[str, any]:
         """
         Process all documents in the documents directory.
