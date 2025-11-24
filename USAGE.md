@@ -107,6 +107,16 @@ Create a `.env` file in the project root:
 OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_BASE_URL=your_base_url  # Optional
 
+# LLM Configuration
+LLM_MODEL=gpt-3.5-turbo        # Options: gpt-4o, gpt-4-turbo, gpt-4, gpt-3.5-turbo, etc.
+LLM_TEMPERATURE=0.7            # 0.0-2.0, controls randomness
+LLM_TOP_P=1.0                 # 0.0-1.0, nucleus sampling
+LLM_MAX_TOKENS=2000            # Maximum tokens in response (optional)
+
+# Query Configuration
+QUERY_N_RESULTS=5              # Number of context chunks to retrieve
+QUERY_MAX_CONTEXT_LENGTH=2000  # Maximum context length in characters
+
 # Output Configuration
 OUTPUT_DIR=./output             # Default: ./output
 
