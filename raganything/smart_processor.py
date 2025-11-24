@@ -262,8 +262,21 @@ class SmartProcessor:
                     extract_only=extract_only,
                 )
                 
-                # If extract_only, skip tracking and continue
+                # If extract_only, check if extraction was successful
                 if extract_only:
+                    content = result.get("content", "")
+                    if not content or len(content) < 10:
+                        logger.warning(f"Extraction may have failed for {doc_path_obj.name}: content too short or empty")
+                        results["errors"].append({
+                            "path": doc_path,
+                            "error": "Extraction produced empty or very short content"
+                        })
+                    else:
+                        extracted_file = result.get("extracted_file") or result.get("output_file")
+                        if extracted_file:
+                            logger.info(f"✅ Extracted {len(content):,} characters to {Path(extracted_file).name}")
+                        else:
+                            logger.warning(f"Extraction completed but no extracted_file path returned for {doc_path_obj.name}")
                     continue
 
                 num_chunks = result.get("num_chunks", 0)
