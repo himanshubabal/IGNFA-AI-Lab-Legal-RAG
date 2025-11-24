@@ -258,7 +258,13 @@ class SmartProcessor:
                 result = self.raganything.process_document_complete(
                     file_path=doc_path,
                     doc_id=Path(doc_path).stem,
+                    skip_if_extracted_exists=not force_extract,
+                    extract_only=extract_only,
                 )
+                
+                # If extract_only, skip tracking and continue
+                if extract_only:
+                    continue
 
                 num_chunks = result.get("num_chunks", 0)
                 content_length = len(result.get("content", ""))
