@@ -229,13 +229,13 @@ class MinerUParser(BaseParser):
             logger.error("MinerU parsing timed out")
             raise RuntimeError("MinerU parsing timed out after 1 hour")
         except FileNotFoundError:
-                error_msg = (
-                    "MinerU not found. Please install MinerU:\n"
-                    "  pip install uv\n"
-                    "  uv pip install -U 'mineru[core]'\n"
-                    "  See: https://github.com/opendatalab/MinerU\n\n"
-                    "Alternatively, you can use Docling parser by setting PARSER=docling in .env"
-                )
+            error_msg = (
+                "MinerU not found. Please install MinerU:\n"
+                "  pip install uv\n"
+                "  uv pip install -U 'mineru[core]'\n"
+                "  See: https://github.com/opendatalab/MinerU\n\n"
+                "Alternatively, you can use Docling parser by setting PARSER=docling in .env"
+            )
             logger.error(error_msg)
             raise RuntimeError(error_msg) from None
 
