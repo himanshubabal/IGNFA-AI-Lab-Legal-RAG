@@ -155,13 +155,24 @@ class RAGAnything:
         )
 
         content = parse_result.get("content", "")
-        if not content:
-            logger.warning("No content extracted from document")
+        content_length = len(content) if content else 0
+        
+        # Log content extraction details
+        logger.info(
+            f"Content extracted from {Path(file_path).name}: {content_length} characters"
+        )
+        if content:
+            # Log first 200 chars for debugging
+            preview = content[:200].replace('\n', ' ').strip()
+            logger.debug(f"Content preview: {preview}...")
+        else:
+            logger.warning(f"No content extracted from {Path(file_path).name}")
             return parse_result
 
         # Split content if requested
         if split_by_character:
             content = content.replace(split_by_character, "\n\n")
+            logger.debug(f"Content after split: {len(content)} characters")
 
         # Process and store in vector database
         metadata = parse_result.get("metadata", {})

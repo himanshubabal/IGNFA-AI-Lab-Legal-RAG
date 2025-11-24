@@ -151,21 +151,81 @@ class MinerUParser(BaseParser):
                 cmd,
                 capture_output=True,
                 text=True,
-                check=True,
+                check=False,  # Don't raise on non-zero exit, we'll check manually
                 timeout=3600,  # 1 hour timeout
             )
+            
+            # Check if command failed
+            if result.returncode != 0:
+                error_msg = result.stderr or result.stdout or "Unknown error"
+                logger.error(f"MinerU command failed with exit code {result.returncode}")
+                logger.error(f"Error output: {error_msg[:500]}")
+                
+                # Check if it's a config file issue
+                if "magic-pdf.json" in error_msg or "config" in error_msg.lower():
+                    logger.error(
+                        "magic-pdf requires a config file at ~/magic-pdf.json. "
+                        "Please create one or check magic-pdf documentation."
+                    )
+                
+                raise RuntimeError(
+                    f"MinerU parsing failed (exit code {result.returncode}): {error_msg[:200]}"
+                )
 
-            # Parse output
-            output_files = list(output_dir.glob("*.md"))
+            # Parse output - magic-pdf creates files in subdirectories
+            # Look for markdown files in output directory and subdirectories
+            output_files = list(output_dir.rglob("*.md"))
+            
+            # Filter out README.md files (these are not the parsed content)
+            output_files = [f for f in output_files if f.name.upper() != "README.MD"]
+            
+            # Also check for files in the output directory itself (excluding README)
             if not output_files:
-                # Try to find output in subdirectories
-                output_files = list(output_dir.rglob("*.md"))
+                output_files = [f for f in output_dir.glob("*.md") if f.name.upper() != "README.MD"]
+            
+            # magic-pdf might create files with the document name as subdirectory
+            # Try looking in a subdirectory matching the file stem
+            if not output_files:
+                file_stem = Path(file_path).stem
+                potential_dirs = [
+                    output_dir / file_stem,
+                    output_dir / Path(file_path).name.replace('.', '_'),
+                ]
+                for potential_dir in potential_dirs:
+                    if potential_dir.exists():
+                        found_files = [f for f in potential_dir.rglob("*.md") if f.name.upper() != "README.MD"]
+                        if found_files:
+                            output_files = found_files
+                            break
+            
+            # Log search results for debugging
+            logger.debug(f"Searching for markdown files in: {output_dir}")
+            logger.debug(f"Found {len(output_files)} markdown file(s) (excluding README)")
+            
+            # If still no files, list what was actually created
+            if not output_files:
+                all_files = list(output_dir.rglob("*"))
+                file_list = [f.name for f in all_files[:10] if f.is_file()]
+                logger.warning(
+                    f"No markdown output files found from MinerU. "
+                    f"Output directory contains: {file_list}"
+                )
 
             if output_files:
                 # Read the first markdown file found
                 markdown_file = output_files[0]
                 with open(markdown_file, "r", encoding="utf-8") as f:
                     content = f.read()
+                
+                # Log content extraction
+                logger.info(
+                    f"MinerU extracted {len(content)} characters from {Path(file_path).name}"
+                )
+                if len(content) < 100:
+                    logger.warning(
+                        f"Very short content extracted ({len(content)} chars). "
+                        f"Check if parsing was successful."
+                    )
 
                 return {
                     "content": content,
