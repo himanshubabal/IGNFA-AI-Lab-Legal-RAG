@@ -190,7 +190,12 @@ class SmartProcessor:
                 results["removed"].append(removed_path)
 
         # Process new documents
+        total_docs = len(new_docs) + len(updated_docs)
+        current_doc = 0
+        
         for doc_path in new_docs:
+            current_doc += 1
+            print(f"\n[{current_doc}/{total_docs}] Processing: {doc_path.name}", flush=True)
             try:
                 logger.info(f"Processing new document: {doc_path}")
                 result = self.raganything.process_document_complete(
@@ -232,6 +237,8 @@ class SmartProcessor:
 
         # Process updated documents
         for doc_path in updated_docs:
+            current_doc += 1
+            print(f"\n[{current_doc}/{total_docs}] Reprocessing: {doc_path.name}", flush=True)
             try:
                 logger.info(f"Reprocessing updated document: {doc_path}")
                 # Remove old entry

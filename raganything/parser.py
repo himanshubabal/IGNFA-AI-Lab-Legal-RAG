@@ -119,10 +119,15 @@ class MinerUParser(BaseParser):
         if end_page is not None:
             cmd.extend(["-e", str(end_page)])  # mineru uses -e for end
 
-        logger.info(f"Running MinerU parser: {' '.join(cmd)}")
-
+        logger.info(f"📄 Starting PDF extraction: {Path(file_path).name}")
+        logger.info(f"   Command: {' '.join(cmd)}")
+        logger.info(f"   Output directory: {output_dir}")
+        
         try:
-            # Execute MinerU command
+            # Execute MinerU command with real-time output for progress tracking
+            import sys
+            print(f"📄 Extracting text from: {Path(file_path).name}...", flush=True)
+            
             result = subprocess.run(
                 cmd,
                 capture_output=True,
@@ -130,6 +135,11 @@ class MinerUParser(BaseParser):
                 check=False,  # Don't raise on non-zero exit, we'll check manually
                 timeout=3600,  # 1 hour timeout
             )
+            
+            if result.returncode == 0:
+                print(f"✅ PDF extraction completed", flush=True)
+            else:
+                print(f"❌ PDF extraction failed", flush=True)
             
             # Check if command failed
             if result.returncode != 0:

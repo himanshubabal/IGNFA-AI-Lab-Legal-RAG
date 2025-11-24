@@ -17,7 +17,7 @@ def main():
     )
     parser.add_argument(
         "command",
-        choices=["process", "process-all", "query", "batch", "ui", "status"],
+        choices=["process", "process-all", "query", "batch", "ui", "status", "reset"],
         help="Command to execute",
     )
     parser.add_argument(
@@ -140,6 +140,63 @@ def main():
         except ImportError:
             print("Error: Streamlit not installed. Install with: pip install streamlit")
             sys.exit(1)
+
+    elif args.command == "reset":
+        from raganything.config import get_config
+        from raganything.document_tracker import DocumentTracker
+        import shutil
+        
+        config = get_config()
+        
+        print("\n" + "=" * 60)
+        print("⚠️  RESET: Clearing all processed data")
+        print("=" * 60)
+        
+        # Confirm with user
+        response = input("This will delete all embeddings and document tracking. Continue? (yes/no): ")
+        if response.lower() not in ['yes', 'y']:
+            print("Reset cancelled.")
+            sys.exit(0)
+        
+        # Clear vector store
+        print("\n🗑️  Clearing vector store...")
+        try:
+            rag = RAGAnything(parser=args.parser)
+            if hasattr(rag.processor, 'vector_store') and rag.processor.vector_store:
+                rag.processor.vector_store.delete()  # Delete all
+                print("✅ Vector store cleared")
+        except Exception as e:
+            print(f"⚠️  Error clearing vector store: {e}")
+        
+        # Clear document tracker
+        print("🗑️  Clearing document tracker...")
+        try:
+            tracker = DocumentTracker()
+            tracker.clear()
+            print("✅ Document tracker cleared")
+        except Exception as e:
+            print(f"⚠️  Error clearing tracker: {e}")
+        
+        # Optionally clear output directory (ask user)
+        response = input("\nDelete output directory contents? (yes/no): ")
+        if response.lower() in ['yes', 'y']:
+            print("🗑️  Clearing output directory...")
+            try:
+                output_dir = config.output_dir
+                if output_dir.exists():
+                    # Keep the directory, just clear contents
+                    for item in output_dir.iterdir():
+                        if item.is_file():
+                            item.unlink()
+                        elif item.is_dir():
+                            shutil.rmtree(item)
+                    print("✅ Output directory cleared")
+            except Exception as e:
+                print(f"⚠️  Error clearing output directory: {e}")
+        
+        print("\n" + "=" * 60)
+        print("✅ Reset complete!")
+        print("=" * 60)
 
     else:
         parser.print_help()

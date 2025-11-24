@@ -403,18 +403,26 @@ class ContentProcessor:
             List of chunk IDs
         """
         # Chunk content
+        import sys
+        content_length = len(content)
+        print(f"✂️  Chunking content ({content_length:,} chars)...", flush=True)
+        
         chunks = self.chunk_text(content)
         
         # Log chunking info for debugging
+        num_chunks = len(chunks)
         logger.info(
-            f"Chunking content: {len(content)} chars -> {len(chunks)} chunks "
+            f"✂️  Chunking: {content_length:,} chars -> {num_chunks} chunks "
             f"(strategy={self.chunk_strategy}, size={self.chunk_size}, overlap={self.chunk_overlap})"
         )
-        if len(chunks) == 1 and len(content) > self.chunk_size:
+        print(f"✅ Created {num_chunks} chunks", flush=True)
+        
+        if num_chunks == 1 and content_length > self.chunk_size:
             logger.warning(
-                f"Only 1 chunk created for {len(content)} char document! "
+                f"⚠️  Only 1 chunk created for {content_length:,} char document! "
                 f"This may indicate a chunking issue."
             )
+            print(f"⚠️  Warning: Only 1 chunk for large document ({content_length:,} chars)", flush=True)
 
         # Generate chunk IDs
         chunk_ids = []

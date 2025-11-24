@@ -247,6 +247,43 @@ def main():
                 if results.get('errors'):
                     st.warning(f"Errors: {len(results['errors'])} documents had errors")
                 st.rerun()
+        
+        st.divider()
+        st.header("🗑️ Reset & Clear")
+        
+        st.warning("⚠️ This will delete all embeddings and document tracking data!")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🗑️ Reset All Data", type="secondary"):
+                if st.session_state.get("confirm_reset", False):
+                    # Perform reset
+                    with st.spinner("Clearing all data..."):
+                        try:
+                            # Clear vector store
+                            if hasattr(st.session_state.rag.processor, 'vector_store') and st.session_state.rag.processor.vector_store:
+                                st.session_state.rag.processor.vector_store.delete()
+                            
+                            # Clear document tracker
+                            st.session_state.processor.tracker.clear()
+                            
+                            st.success("✅ All data cleared! Vector store and document tracker reset.")
+                            st.session_state.confirm_reset = False
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error during reset: {str(e)}")
+                else:
+                    st.session_state.confirm_reset = True
+                    st.warning("⚠️ Click again to confirm reset")
+                    st.rerun()
+        
+        with col2:
+            if st.button("🔄 Clear Confirmation"):
+                st.session_state.confirm_reset = False
+                st.rerun()
+        
+        if st.session_state.get("confirm_reset", False):
+            st.info("💡 Click 'Reset All Data' again to confirm, or 'Clear Confirmation' to cancel")
 
         st.divider()
         
