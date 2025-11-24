@@ -62,7 +62,8 @@ if "auto_process" not in st.session_state:
     st.session_state.auto_process = True
 if "embedding_model" not in st.session_state:
     config = get_config()
-    st.session_state.embedding_model = config.embedding_model
+    # Use getattr with default in case Config was initialized before embedding_model was added
+    st.session_state.embedding_model = getattr(config, 'embedding_model', 'text-embedding-3-small')
 if "llm_model" not in st.session_state:
     st.session_state.llm_model = config.llm_model  # Use config default
 if "llm_temperature" not in st.session_state:
@@ -194,7 +195,8 @@ def main():
             "text-embedding-3-small",
             "text-embedding-ada-002",
         ]
-        default_embedding = config.embedding_model
+        # Use getattr with default in case Config was initialized before embedding_model was added
+        default_embedding = getattr(config, 'embedding_model', 'text-embedding-3-small')
         current_embedding_index = (
             embedding_models.index(st.session_state.get("embedding_model", default_embedding))
             if st.session_state.get("embedding_model", default_embedding) in embedding_models
