@@ -217,6 +217,9 @@ class ChromaVectorStore(BaseVectorStore):
             from chromadb.config import Settings
         except ImportError:
             raise RuntimeError("ChromaDB not installed. Install with: pip install chromadb")
+        
+        # Store chromadb module for later use
+        self._chromadb = chromadb
 
         self.collection_name = collection_name
         self.persist_directory = persist_directory
@@ -230,8 +233,28 @@ class ChromaVectorStore(BaseVectorStore):
         # Get or create collection
         try:
             self.collection = self.client.get_collection(name=collection_name)
-        except Exception:
-            self.collection = self.client.create_collection(name=collection_name)
+            logger.debug(f"Retrieved existing collection: {collection_name}")
+        except Exception as e:
+            # Collection doesn't exist or is corrupted - create new one
+            logger.warning(f"Could not get collection '{collection_name}': {e}. Creating new collection.")
+            try:
+                # Try to delete corrupted collection if it exists
+                try:
+                    self.client.delete_collection(name=collection_name)
+                    logger.info(f"Deleted corrupted collection: {collection_name}")
+                except Exception:
+                    pass  # Collection might not exist
+                
+                # Create new collection
+                self.collection = self.client.create_collection(name=collection_name)
+                logger.info(f"Created new collection: {collection_name}")
+            except Exception as create_error:
+                logger.error(f"Failed to create collection: {create_error}")
+                raise RuntimeError(
+                    f"Failed to create ChromaDB collection '{collection_name}': {create_error}\n"
+                    "This might be due to a corrupted database. Try resetting with: "
+                    "python -m raganything.cli reset"
+                ) from create_error
 
     def add_documents(
         self,
