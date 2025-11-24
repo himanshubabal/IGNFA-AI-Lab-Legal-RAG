@@ -60,6 +60,9 @@ if "processor" not in st.session_state:
     st.session_state.processor = None
 if "auto_process" not in st.session_state:
     st.session_state.auto_process = True
+if "embedding_model" not in st.session_state:
+    config = get_config()
+    st.session_state.embedding_model = config.embedding_model
 if "llm_model" not in st.session_state:
     st.session_state.llm_model = config.llm_model  # Use config default
 if "llm_temperature" not in st.session_state:
@@ -181,6 +184,40 @@ def main():
         )
         st.session_state.query_max_context_length = query_max_context_length
 
+        st.divider()
+        
+        # Embedding Model Configuration
+        st.subheader("🔢 Embedding Model")
+        config = get_config()
+        embedding_models = [
+            "text-embedding-3-large",
+            "text-embedding-3-small",
+            "text-embedding-ada-002",
+        ]
+        default_embedding = config.embedding_model
+        current_embedding_index = (
+            embedding_models.index(st.session_state.get("embedding_model", default_embedding))
+            if st.session_state.get("embedding_model", default_embedding) in embedding_models
+            else (embedding_models.index(default_embedding) if default_embedding in embedding_models else 1)
+        )
+        embedding_model = st.selectbox(
+            "Embedding Model",
+            embedding_models,
+            index=current_embedding_index,
+            help=f"Model for generating embeddings (default: {default_embedding})",
+        )
+        st.session_state.embedding_model = embedding_model
+        
+        if st.button("📋 List All Embedding Models"):
+            st.info("""
+**OpenAI Embedding Models:**
+- `text-embedding-3-large` - Highest quality, 3072 dimensions
+- `text-embedding-3-small` - Balanced, 1536 dimensions (default)
+- `text-embedding-ada-002` - Legacy, 1536 dimensions
+
+**Note:** Set `EMBEDDING_MODEL` in `.env` to change the default.
+            """)
+        
         st.divider()
         
         # Parser Configuration

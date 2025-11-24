@@ -39,6 +39,9 @@ class Config:
             self.openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
             self.openai_base_url: Optional[str] = os.getenv("OPENAI_BASE_URL")
             
+            # Embedding model configuration
+            self.embedding_model: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+            
             # LLM configuration
             self.llm_model: str = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
             self.llm_temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.7"))

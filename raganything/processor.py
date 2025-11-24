@@ -235,26 +235,42 @@ class ChromaVectorStore(BaseVectorStore):
             self.collection = self.client.get_collection(name=collection_name)
             logger.debug(f"Retrieved existing collection: {collection_name}")
         except Exception as e:
-            # Collection doesn't exist or is corrupted - create new one
-            logger.warning(f"Could not get collection '{collection_name}': {e}. Creating new collection.")
-            try:
-                # Try to delete corrupted collection if it exists
+            error_msg = str(e)
+            # Check for specific ChromaDB errors
+            if "does not exist" in error_msg or "Collection" in error_msg and "does not exist" in error_msg:
+                # Collection doesn't exist - create it
+                logger.info(f"Collection '{collection_name}' does not exist. Creating new collection.")
                 try:
-                    self.client.delete_collection(name=collection_name)
-                    logger.info(f"Deleted corrupted collection: {collection_name}")
-                except Exception:
-                    pass  # Collection might not exist
-                
-                # Create new collection
-                self.collection = self.client.create_collection(name=collection_name)
-                logger.info(f"Created new collection: {collection_name}")
-            except Exception as create_error:
-                logger.error(f"Failed to create collection: {create_error}")
-                raise RuntimeError(
-                    f"Failed to create ChromaDB collection '{collection_name}': {create_error}\n"
-                    "This might be due to a corrupted database. Try resetting with: "
-                    "python -m raganything.cli reset"
-                ) from create_error
+                    self.collection = self.client.create_collection(name=collection_name)
+                    logger.info(f"Created new collection: {collection_name}")
+                except Exception as create_error:
+                    logger.error(f"Failed to create collection: {create_error}")
+                    raise RuntimeError(
+                        f"Failed to create ChromaDB collection '{collection_name}': {create_error}\n"
+                        "This might be due to a corrupted database. Try resetting with: "
+                        "python -m raganything.cli reset"
+                    ) from create_error
+            else:
+                # Collection might be corrupted - try to recreate
+                logger.warning(f"Could not get collection '{collection_name}': {e}. Attempting to recreate.")
+                try:
+                    # Try to delete corrupted collection if it exists
+                    try:
+                        self.client.delete_collection(name=collection_name)
+                        logger.info(f"Deleted corrupted collection: {collection_name}")
+                    except Exception:
+                        pass  # Collection might not exist
+                    
+                    # Create new collection
+                    self.collection = self.client.create_collection(name=collection_name)
+                    logger.info(f"Created new collection: {collection_name}")
+                except Exception as create_error:
+                    logger.error(f"Failed to create collection: {create_error}")
+                    raise RuntimeError(
+                        f"Failed to create ChromaDB collection '{collection_name}': {create_error}\n"
+                        "This might be due to a corrupted database. Try resetting with: "
+                        "python -m raganything.cli reset"
+                    ) from create_error
 
     def add_documents(
         self,
@@ -278,7 +294,7 @@ class ChromaVectorStore(BaseVectorStore):
                 api_key=config.openai_api_key,
                 base_url=config.openai_base_url,
             )
-            embeddings = generator.generate_embeddings(documents)
+            embeddings = generator.generate_embeddings(documents, model=config.embedding_model)
 
         # Prepare metadatas
         if metadatas is None:

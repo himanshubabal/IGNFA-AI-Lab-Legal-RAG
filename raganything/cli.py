@@ -17,7 +17,7 @@ def main():
     )
     parser.add_argument(
         "command",
-        choices=["process", "process-all", "query", "batch", "ui", "status", "reset"],
+        choices=["process", "process-all", "query", "batch", "ui", "status", "reset", "list-embeddings"],
         help="Command to execute",
     )
     parser.add_argument(
@@ -249,6 +249,18 @@ def main():
         
         print("\n" + "=" * 60)
         print("✅ Reset complete!")
+        print("=" * 60)
+
+    elif args.command == "list-embeddings":
+        print("\n" + "=" * 60)
+        print("📋 Available Embedding Models")
+        print("=" * 60)
+        print("\nOpenAI Embedding Models:")
+        print("  • text-embedding-3-large    - Highest quality, 3072 dimensions")
+        print("  • text-embedding-3-small    - Balanced, 1536 dimensions (default)")
+        print("  • text-embedding-ada-002    - Legacy, 1536 dimensions")
+        print("\nNote: These models require OpenAI API access.")
+        print("Set EMBEDDING_MODEL in .env to change the default model.")
         print("=" * 60)
 
     else:
