@@ -17,7 +17,33 @@ import streamlit as st
 from raganything import RAGAnything, get_config
 from raganything.smart_processor import SmartProcessor
 from raganything.document_tracker import DocumentTracker
-from raganything.prompt import load_prompt_from_file, get_system_prompt
+
+# Import prompt functions with fallback
+try:
+    from raganything.prompt import load_prompt_from_file, get_system_prompt
+except ImportError:
+    # Fallback: import directly from module
+    import raganything.prompt as prompt_module
+    load_prompt_from_file = getattr(prompt_module, 'load_prompt_from_file', None)
+    get_system_prompt = getattr(prompt_module, 'get_system_prompt', None)
+    
+    if load_prompt_from_file is None or get_system_prompt is None:
+        # Last resort: define minimal versions
+        def load_prompt_from_file(file_path: str):
+            """Load prompt from file."""
+            from pathlib import Path
+            prompt_path = Path(file_path)
+            if not prompt_path.exists():
+                prompt_path = Path.cwd() / file_path
+            if not prompt_path.exists():
+                prompt_path = Path(__file__).parent.parent.parent / file_path
+            if prompt_path.exists():
+                return prompt_path.read_text(encoding="utf-8").strip()
+            return None
+        
+        def get_system_prompt(template=None):
+            """Get system prompt."""
+            return "You are a helpful assistant that answers questions based on provided context from documents."
 
 # Page configuration
 st.set_page_config(
