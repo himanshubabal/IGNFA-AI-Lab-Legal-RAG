@@ -7,6 +7,7 @@ This module provides a unified interface for different document parsers
 
 import json
 import subprocess
+import sys
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -95,8 +96,16 @@ class MinerUParser(BaseParser):
         else:
             output_dir = ensure_directory(Path(output_dir))
 
-        # Build MinerU command
-        cmd = ["mineru", "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
+        # Build MinerU command (magic-pdf is the CLI command)
+        # Try 'magic-pdf' first, fallback to 'mineru' for compatibility
+        cmd_base = "magic-pdf"
+        try:
+            import subprocess
+            subprocess.run([cmd_base, "--version"], capture_output=True, check=True, timeout=5)
+        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            cmd_base = "mineru"  # Fallback to mineru if magic-pdf not found
+        
+        cmd = [cmd_base, "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
 
         # Add optional parameters
         if lang:
@@ -280,17 +289,58 @@ class ParserFactory:
     @staticmethod
     def check_mineru_available() -> bool:
         """Check if MinerU is available in the system."""
+        # First, try to check if magic-pdf Python package is installed
+        try:
+            import magic_pdf
+            # If we can import it, it's available
+            return True
+        except ImportError:
+            pass
+        
+        # Also check for CLI command (mineru or magic-pdf)
         try:
             import subprocess
+            # Try 'mineru' command
             result = subprocess.run(
                 ["mineru", "--version"],
                 capture_output=True,
                 text=True,
                 timeout=5,
             )
-            return result.returncode == 0
+            if result.returncode == 0:
+                return True
         except (FileNotFoundError, subprocess.TimeoutExpired):
-            return False
+            pass
+        
+        # Try 'magic-pdf' command
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["magic-pdf", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                return True
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+        
+        # Try python -m magic_pdf
+        try:
+            import subprocess
+            result = subprocess.run(
+                [sys.executable, "-m", "magic_pdf", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                return True
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+        
+        return False
 
     @staticmethod
     def create_parser(parser_type: Optional[str] = None, parse_method: str = "auto") -> BaseParser:
