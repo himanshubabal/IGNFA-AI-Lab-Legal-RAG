@@ -606,10 +606,12 @@ def main():
                            if st.button("▶️ Process", key=f"process_{doc['path']}"):
                                with st.spinner("Processing..."):
                                    try:
-                                       # Use output_flag_span from session state if available
+                                       # Use options from session state
                                        process_kwargs = {}
                                        if st.session_state.get("output_flag_span") is not None:
                                            process_kwargs["output_flag_span"] = st.session_state.output_flag_span
+                                       process_kwargs["extract_only"] = st.session_state.get("extract_only", False)
+                                       process_kwargs["skip_if_extracted_exists"] = not st.session_state.get("force_extract", False)
                                        
                                        result = st.session_state.rag.process_document_complete(
                                            file_path=doc["path"],
