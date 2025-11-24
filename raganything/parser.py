@@ -450,7 +450,7 @@ class ParserFactory:
                 return DoclingParser()
             return MinerUParser(parse_method=parse_method)
         elif parser_type == "docling":
-            return DoclingParser(parse_method=parse_method)
+            return DoclingParser()  # DoclingParser doesn't support parse_method
         else:
             raise ValueError(f"Unknown parser type: {parser_type}. Use 'mineru' or 'docling'")
 
