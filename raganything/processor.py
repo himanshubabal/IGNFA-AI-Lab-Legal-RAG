@@ -331,7 +331,7 @@ class ChromaVectorStore(BaseVectorStore):
                 api_key=config.openai_api_key,
                 base_url=config.openai_base_url,
             )
-            query_embeddings = generator.generate_embeddings([query])
+            query_embeddings = generator.generate_embeddings([query], model=config.embedding_model)
             query_embedding = query_embeddings[0] if query_embeddings else None
 
         if query_embedding is None:
