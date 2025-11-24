@@ -453,12 +453,18 @@ class ContentProcessor:
             metadatas.append(chunk_meta)
 
         # Store in vector database
+        import sys
+        print(f"💾 Storing {len(chunk_ids)} chunks in vector database...", flush=True)
+        logger.info(f"💾 Storing {len(chunk_ids)} chunks in vector database")
+        
         self.vector_store.add_documents(
             documents=chunks,
             metadatas=metadatas,
             ids=chunk_ids,
         )
-
+        
+        logger.info(f"✅ Successfully stored {len(chunk_ids)} chunks in vector database")
+        print(f"✅ Stored {len(chunk_ids)} chunks in vector database", flush=True)
         return chunk_ids
 
     def get_statistics(self, content: str) -> Dict[str, Any]:

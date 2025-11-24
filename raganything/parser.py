@@ -193,13 +193,19 @@ class MinerUParser(BaseParser):
             if output_files:
                 # Read the first markdown file found
                 markdown_file = output_files[0]
+                logger.info(f"Reading markdown from: {markdown_file}")
+                print(f"📖 Reading extracted content...", flush=True)
+                
                 with open(markdown_file, "r", encoding="utf-8") as f:
                     content = f.read()
                 
                 # Log content extraction
+                content_length = len(content)
+                word_count = len(content.split())
                 logger.info(
-                    f"MinerU extracted {len(content)} characters from {Path(file_path).name}"
+                    f"✅ MinerU extracted {content_length:,} characters ({word_count:,} words) from {Path(file_path).name}"
                 )
+                print(f"✅ Extracted {content_length:,} characters ({word_count:,} words)", flush=True)
                 if len(content) < 100:
                     logger.warning(
                         f"Very short content extracted ({len(content)} chars). "
