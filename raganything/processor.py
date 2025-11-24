@@ -183,8 +183,34 @@ class EmbeddingGenerator:
         logger.info(f"🔢 Generating embeddings for {num_texts} chunks using {model}")
 
         client = self._get_client()
+        
+        # Check if client is available
+        if client is None:
+            error_msg = (
+                "OpenAI client not initialized. Please check your API configuration:\n"
+                "- Ensure OPENAI_API_KEY is set in environment variables or Streamlit secrets\n"
+                "- Verify your API key is valid\n"
+                "- Check network connectivity"
+            )
+            logger.error(error_msg)
+            print(f"❌ {error_msg}", flush=True)
+            raise RuntimeError(error_msg)
+        
+        # Check if API key is set
+        if not self.api_key:
+            error_msg = (
+                "OpenAI API key not found. Please configure it:\n"
+                "- Set OPENAI_API_KEY in environment variables\n"
+                "- Or configure it in Streamlit secrets (.streamlit/secrets.toml)\n"
+                "- Or set it in .env file"
+            )
+            logger.error(error_msg)
+            print(f"❌ {error_msg}", flush=True)
+            raise RuntimeError(error_msg)
 
         try:
+            from openai import APIConnectionError, APITimeoutError, AuthenticationError, RateLimitError
+            
             response = client.embeddings.create(
                 model=model,
                 input=texts,
@@ -195,10 +221,88 @@ class EmbeddingGenerator:
             logger.info(f"✅ Successfully generated {len(embeddings)} embeddings")
             return embeddings
 
+        except APIConnectionError as e:
+            error_msg = (
+                f"Connection error when generating embeddings: {str(e)}\n\n"
+                "Troubleshooting steps:\n"
+                "1. Check your internet connection\n"
+                "2. Verify OPENAI_BASE_URL is correct (if using custom endpoint)\n"
+                "3. Check if OpenAI API is accessible from your network\n"
+                "4. Try again in a few moments (API might be temporarily unavailable)"
+            )
+            logger.error(error_msg)
+            print(f"❌ {error_msg}", flush=True)
+            raise RuntimeError(error_msg) from e
+            
+        except APITimeoutError as e:
+            error_msg = (
+                f"Timeout error when generating embeddings: {str(e)}\n\n"
+                "The API request took too long. This might be due to:\n"
+                "1. Network latency\n"
+                "2. Large batch size\n"
+                "3. API server load\n\n"
+                "Try processing fewer documents at once or try again later."
+            )
+            logger.error(error_msg)
+            print(f"❌ {error_msg}", flush=True)
+            raise RuntimeError(error_msg) from e
+            
+        except AuthenticationError as e:
+            error_msg = (
+                f"Authentication error when generating embeddings: {str(e)}\n\n"
+                "Your API key is invalid or expired. Please:\n"
+                "1. Verify your OPENAI_API_KEY is correct\n"
+                "2. Check if the API key has necessary permissions\n"
+                "3. Generate a new API key from https://platform.openai.com/api-keys"
+            )
+            logger.error(error_msg)
+            print(f"❌ {error_msg}", flush=True)
+            raise RuntimeError(error_msg) from e
+            
+        except RateLimitError as e:
+            error_msg = (
+                f"Rate limit exceeded when generating embeddings: {str(e)}\n\n"
+                "You've exceeded your API rate limit. Please:\n"
+                "1. Wait a few moments before retrying\n"
+                "2. Check your OpenAI usage limits\n"
+                "3. Process documents in smaller batches"
+            )
+            logger.error(error_msg)
+            print(f"❌ {error_msg}", flush=True)
+            raise RuntimeError(error_msg) from e
+            
         except Exception as e:
-            logger.error(f"❌ Error generating embeddings: {str(e)}")
-            print(f"❌ Error generating embeddings: {str(e)}", flush=True)
-            raise RuntimeError(f"Failed to generate embeddings: {str(e)}") from e
+            error_msg = f"Error generating embeddings: {str(e)}\n\n"
+            error_type = type(e).__name__
+            
+            # Provide specific guidance based on error type
+            if "connection" in str(e).lower() or "ConnectionError" in error_type:
+                error_msg += (
+                    "Connection issue detected. Please:\n"
+                    "1. Check your internet connection\n"
+                    "2. Verify API endpoint is accessible\n"
+                    "3. Check firewall/proxy settings\n"
+                    "4. Try again in a few moments"
+                )
+            elif "timeout" in str(e).lower():
+                error_msg += (
+                    "Request timed out. Please:\n"
+                    "1. Check your network connection\n"
+                    "2. Try processing fewer documents at once\n"
+                    "3. Retry the operation"
+                )
+            else:
+                error_msg += (
+                    "Unexpected error occurred. Please:\n"
+                    "1. Check your API configuration\n"
+                    "2. Verify your API key is valid\n"
+                    "3. Check OpenAI API status\n"
+                    "4. Review error details above"
+                )
+            
+            logger.error(f"❌ {error_msg}")
+            print(f"❌ {error_msg}", flush=True)
+            raise RuntimeError(error_msg) from e
 
 
 class ChromaVectorStore(BaseVectorStore):
