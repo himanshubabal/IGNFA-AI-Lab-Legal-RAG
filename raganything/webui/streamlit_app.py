@@ -228,6 +228,18 @@ def main():
         parse_method = st.selectbox("Parse Method", ["auto", "ocr", "txt"], index=0)
         chunk_size = st.slider("Chunk Size", 500, 2000, 1000)
         chunk_overlap = st.slider("Chunk Overlap", 0, 500, 200)
+        
+        # Output flag/span files option for MinerU
+        output_flag_span = None
+        if parser == "mineru":
+            config = get_config()
+            default_output_flag_span = getattr(config, 'mineru_output_flag_span', True)
+            output_flag_span = st.checkbox(
+                "Output verification files (span.pdf, layout.pdf, etc.)",
+                value=default_output_flag_span,
+                help="If checked, MinerU will generate additional files for verification (e.g., span.pdf, layout.pdf). MinerU generates these by default.",
+            )
+            st.session_state.output_flag_span = output_flag_span
 
         if st.button("🔄 Reinitialize RAG"):
             with st.spinner("Reinitializing..."):
