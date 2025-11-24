@@ -11,7 +11,6 @@ typing-extensions>=4.0.0
 # Install with: pip install uv && uv pip install -U "mineru[core]"
 # See: https://github.com/opendatalab/MinerU
 mineru[core]  # Official MinerU parser (install separately if needed)
-# Legacy: magic-pdf (older package, use mineru[core] instead)
 docling    # Docling parser (install separately if needed)
 
 # Optional: Extended format support

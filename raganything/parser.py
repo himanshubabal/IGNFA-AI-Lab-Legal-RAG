@@ -97,49 +97,27 @@ class MinerUParser(BaseParser):
             output_dir = ensure_directory(Path(output_dir))
 
         # Build MinerU command - use official 'mineru' command (from mineru[core] package)
-        # Try 'mineru' first (official), fallback to 'magic-pdf' for compatibility
         cmd_base = "mineru"
-        is_official_mineru = True
         try:
             subprocess.run([cmd_base, "--version"], capture_output=True, check=True, timeout=5)
         except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            # Fallback to magic-pdf for backward compatibility
-            cmd_base = "magic-pdf"
-            is_official_mineru = False
-            try:
-                subprocess.run([cmd_base, "--version"], capture_output=True, check=True, timeout=5)
-            except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
-                raise RuntimeError(
-                    "MinerU not found. Please install MinerU:\n"
-                    "  pip install uv\n"
-                    "  uv pip install -U 'mineru[core]'\n"
-                    "Or visit: https://github.com/opendatalab/MinerU"
-                )
+            raise RuntimeError(
+                "MinerU not found. Please install MinerU:\n"
+                "  pip install uv\n"
+                "  uv pip install -U 'mineru[core]'\n"
+                "See: https://github.com/opendatalab/MinerU"
+            )
         
-        # Build base command
-        if is_official_mineru:
-            # Official mineru command uses: -p (path), -o (output-dir), -m (method)
-            cmd = [cmd_base, "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
-            
-            # Add optional parameters (official mineru format)
-            if lang:
-                cmd.extend(["-l", lang])  # mineru uses -l for lang
-            if start_page is not None:
-                cmd.extend(["-s", str(start_page)])  # mineru uses -s for start
-            if end_page is not None:
-                cmd.extend(["-e", str(end_page)])  # mineru uses -e for end
-            # Note: Official mineru may not support all legacy parameters
-        else:
-            # Legacy magic-pdf command format (for backward compatibility)
-            cmd = [cmd_base, "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
-            
-            # Add optional parameters (magic-pdf specific)
-            if lang:
-                cmd.extend(["-l", lang])
-            if start_page is not None:
-                cmd.extend(["-s", str(start_page)])
-            if end_page is not None:
-                cmd.extend(["-e", str(end_page)])
+        # Build base command - official mineru uses: -p (path), -o (output-dir), -m (method)
+        cmd = [cmd_base, "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
+        
+        # Add optional parameters
+        if lang:
+            cmd.extend(["-l", lang])  # mineru uses -l for lang
+        if start_page is not None:
+            cmd.extend(["-s", str(start_page)])  # mineru uses -s for start
+        if end_page is not None:
+            cmd.extend(["-e", str(end_page)])  # mineru uses -e for end
 
         logger.info(f"Running MinerU parser: {' '.join(cmd)}")
 
@@ -159,18 +137,11 @@ class MinerUParser(BaseParser):
                 logger.error(f"MinerU command failed with exit code {result.returncode}")
                 logger.error(f"Error output: {error_msg[:500]}")
                 
-                # Check if it's a config file issue
-                if "magic-pdf.json" in error_msg or "config" in error_msg.lower():
-                    logger.error(
-                        "magic-pdf requires a config file at ~/magic-pdf.json. "
-                        "Please create one or check magic-pdf documentation."
-                    )
-                
                 raise RuntimeError(
                     f"MinerU parsing failed (exit code {result.returncode}): {error_msg[:200]}"
                 )
 
-            # Parse output - magic-pdf creates files in subdirectories
+            # Parse output - MinerU creates files in subdirectories
             # Look for markdown files in output directory and subdirectories
             output_files = list(output_dir.rglob("*.md"))
             
@@ -181,7 +152,7 @@ class MinerUParser(BaseParser):
             if not output_files:
                 output_files = [f for f in output_dir.glob("*.md") if f.name.upper() != "README.MD"]
             
-            # magic-pdf might create files with the document name as subdirectory
+            # MinerU might create files with the document name as subdirectory
             # Try looking in a subdirectory matching the file stem
             if not output_files:
                 file_stem = Path(file_path).stem
@@ -258,12 +229,13 @@ class MinerUParser(BaseParser):
             logger.error("MinerU parsing timed out")
             raise RuntimeError("MinerU parsing timed out after 1 hour")
         except FileNotFoundError:
-            error_msg = (
-                "MinerU not found. Please install MinerU:\n"
-                "  pip install magic-pdf\n"
-                "  Or visit: https://github.com/HKUDS/MinerU\n\n"
-                "Alternatively, you can use Docling parser by setting PARSER=docling in .env"
-            )
+                error_msg = (
+                    "MinerU not found. Please install MinerU:\n"
+                    "  pip install uv\n"
+                    "  uv pip install -U 'mineru[core]'\n"
+                    "  See: https://github.com/opendatalab/MinerU\n\n"
+                    "Alternatively, you can use Docling parser by setting PARSER=docling in .env"
+                )
             logger.error(error_msg)
             raise RuntimeError(error_msg) from None
 
@@ -363,18 +335,17 @@ class ParserFactory:
     @staticmethod
     def check_mineru_available() -> bool:
         """Check if MinerU is available in the system."""
-        # First, try to check if magic-pdf Python package is installed
+        # First, try to check if official mineru Python package is installed
         try:
-            import magic_pdf
-            # If we can import it, it's available
+            import mineru
             return True
         except ImportError:
             pass
         
-        # Also check for CLI command (mineru or magic-pdf)
+        # Also check for CLI command
         try:
             import subprocess
-            # Try 'mineru' command
+            # Try official 'mineru' command
             result = subprocess.run(
                 ["mineru", "--version"],
                 capture_output=True,
@@ -386,25 +357,11 @@ class ParserFactory:
         except (FileNotFoundError, subprocess.TimeoutExpired):
             pass
         
-        # Try 'magic-pdf' command
+        # Try python -m mineru
         try:
             import subprocess
             result = subprocess.run(
-                ["magic-pdf", "--version"],
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
-            if result.returncode == 0:
-                return True
-        except (FileNotFoundError, subprocess.TimeoutExpired):
-            pass
-        
-        # Try python -m magic_pdf
-        try:
-            import subprocess
-            result = subprocess.run(
-                [sys.executable, "-m", "magic_pdf", "--version"],
+                [sys.executable, "-m", "mineru", "--version"],
                 capture_output=True,
                 text=True,
                 timeout=5,
