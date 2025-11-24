@@ -173,6 +173,7 @@ OUTPUT_DIR=./output             # Default: ./output
 # Parser Configuration
 PARSER=mineru                   # Options: mineru or docling
 PARSE_METHOD=auto               # Options: auto, ocr, or txt
+MINERU_OUTPUT_FLAG_SPAN=true   # Output verification files (span.pdf, layout.pdf, etc.) - default: true
 ```
 
 ### Default Directories

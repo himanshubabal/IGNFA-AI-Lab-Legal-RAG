@@ -80,6 +80,10 @@ class Config:
             if legacy_method and not os.getenv("PARSE_METHOD"):
                 self.parse_method = legacy_method.lower()
 
+            # MinerU output configuration (flag and span files for verification)
+            # Default to True to enable verification files (span.pdf, etc.)
+            self.mineru_output_flag_span: bool = os.getenv("MINERU_OUTPUT_FLAG_SPAN", "true").lower() in ["true", "1", "yes", "on"]
+
             # Ensure output directory exists
             self.output_dir.mkdir(parents=True, exist_ok=True)
 

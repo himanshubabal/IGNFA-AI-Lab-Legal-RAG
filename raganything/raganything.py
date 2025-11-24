@@ -115,6 +115,10 @@ class RAGAnything:
 
         logger.info(f"Processing document: {file_path}")
 
+        # Pass output_flag_span to parser if specified
+        if output_flag_span is not None:
+            parser_kwargs["output_flag_span"] = output_flag_span
+
         # Parse document
         result = self.parser.parse(file_path=file_path, output_dir=output_dir, **parser_kwargs)
 

@@ -97,6 +97,10 @@ class MinerUParser(BaseParser):
         else:
             output_dir = ensure_directory(Path(output_dir))
 
+        # Determine if flag/span files should be output (default True)
+        if output_flag_span is None:
+            output_flag_span = config.mineru_output_flag_span
+
         # Build MinerU command - use official 'mineru' command (from mineru[core] package)
         cmd_base = "mineru"
         try:
@@ -119,6 +123,13 @@ class MinerUParser(BaseParser):
             cmd.extend(["-s", str(start_page)])  # mineru uses -s for start
         if end_page is not None:
             cmd.extend(["-e", str(end_page)])  # mineru uses -e for end
+
+        # Note: MinerU generates span.pdf and other verification files by default
+        # These are useful for verification and debugging. The output_flag_span flag
+        # is stored in config but MinerU doesn't have a CLI flag to disable them.
+        # They are always generated in the output directory.
+        if output_flag_span:
+            logger.info("Verification files (span.pdf, layout.pdf, etc.) will be generated in output directory")
 
         logger.info(f"📄 Starting PDF extraction: {Path(file_path).name}")
         logger.info(f"   Command: {' '.join(cmd)}")
