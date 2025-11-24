@@ -64,7 +64,9 @@ htmlcov/
 *.docx
 *.pptx
 *.xlsx
-documents/
+documents/*
+# Exception: Include README.md in documents directory for documentation
+!documents/README.md
 # chroma_db/ is now tracked via exception in "Output directories" section above
 vector_store/
 
