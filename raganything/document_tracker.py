@@ -48,14 +48,20 @@ class DocumentTracker:
     def _save_tracker(self):
         """Save tracker data to file."""
         try:
+            # Ensure parent directory exists
+            self.tracker_file.parent.mkdir(parents=True, exist_ok=True)
+            
             data = {
                 "processed_docs": self.processed_docs,
                 "last_updated": datetime.now().isoformat(),
             }
             with open(self.tracker_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
+            
+            logger.debug(f"Tracker file saved: {self.tracker_file}")
         except Exception as e:
             logger.error(f"Error saving tracker file: {e}")
+            raise
 
     def get_processed_docs(self) -> Dict[str, Dict]:
         """Get all processed documents."""
@@ -168,7 +174,11 @@ class DocumentTracker:
         return list(self.processed_docs.keys())
 
     def clear(self):
-        """Clear all tracked documents."""
+        """Clear all tracked documents and ensure tracker file exists."""
         self.processed_docs = {}
         self._save_tracker()
+        # Verify file was created
+        if not self.tracker_file.exists():
+            logger.warning(f"Tracker file not found after clear, attempting to recreate: {self.tracker_file}")
+            self._save_tracker()
 

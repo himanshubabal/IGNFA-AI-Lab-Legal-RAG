@@ -186,6 +186,11 @@ def main():
             tracker = DocumentTracker()
             tracker.clear()
             print("✅ Document tracker cleared")
+            # Verify tracker file exists (should be empty but present)
+            if tracker.tracker_file.exists():
+                print(f"✅ Tracker file recreated: {tracker.tracker_file}")
+            else:
+                print(f"⚠️  Warning: Tracker file not found at {tracker.tracker_file}")
         except Exception as e:
             print(f"⚠️  Error clearing tracker: {e}")
         
@@ -195,14 +200,24 @@ def main():
             print("🗑️  Clearing output directory...")
             try:
                 output_dir = config.output_dir
+                tracker_file = output_dir / ".document_tracker.json"
                 if output_dir.exists():
                     # Keep the directory, just clear contents
+                    # But preserve the tracker file - we'll recreate it after
                     for item in output_dir.iterdir():
+                        # Skip the tracker file - we want to keep it
+                        if item.name == ".document_tracker.json":
+                            continue
                         if item.is_file():
                             item.unlink()
                         elif item.is_dir():
                             shutil.rmtree(item)
-                    print("✅ Output directory cleared")
+                    print("✅ Output directory cleared (tracker file preserved)")
+                    
+                    # Ensure tracker file exists after clearing
+                    tracker = DocumentTracker()
+                    tracker.clear()  # This will create/update the tracker file
+                    print(f"✅ Tracker file ensured: {tracker.tracker_file}")
             except Exception as e:
                 print(f"⚠️  Error clearing output directory: {e}")
         
