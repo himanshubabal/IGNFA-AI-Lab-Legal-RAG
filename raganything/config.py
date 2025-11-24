@@ -37,9 +37,10 @@ class Config:
                 # so os.getenv() can access them
                 if hasattr(st, 'secrets') and st.secrets:
                     for key, value in st.secrets.items():
-                        if key not in os.environ:
+                        # Convert value to string and handle None values
+                        if value is not None:
                             os.environ[key] = str(value)
-            except (ImportError, AttributeError):
+            except (ImportError, AttributeError, RuntimeError):
                 # Not running in Streamlit or secrets not available, continue with .env loading
                 pass
             

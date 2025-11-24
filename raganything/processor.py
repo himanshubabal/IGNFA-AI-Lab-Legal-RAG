@@ -196,17 +196,32 @@ class EmbeddingGenerator:
             print(f"❌ {error_msg}", flush=True)
             raise RuntimeError(error_msg)
         
-        # Check if API key is set
-        if not self.api_key:
+        # Check if API key is set (try to get from client if not in self.api_key)
+        api_key = self.api_key
+        if not api_key and hasattr(client, '_client') and hasattr(client._client, 'api_key'):
+            api_key = client._client.api_key
+        if not api_key:
+            # Try to get from environment as fallback
+            import os
+            api_key = os.getenv("OPENAI_API_KEY")
+            
+        if not api_key:
             error_msg = (
                 "OpenAI API key not found. Please configure it:\n"
                 "- Set OPENAI_API_KEY in environment variables\n"
                 "- Or configure it in Streamlit secrets (.streamlit/secrets.toml)\n"
-                "- Or set it in .env file"
+                "- Or set it in .env file\n\n"
+                "For Streamlit Cloud: Go to Settings → Secrets and add:\n"
+                "OPENAI_API_KEY = \"your-api-key-here\""
             )
             logger.error(error_msg)
             print(f"❌ {error_msg}", flush=True)
             raise RuntimeError(error_msg)
+        
+        # Log API key status (masked for security)
+        masked_key = f"{api_key[:8]}...{api_key[-4:]}" if len(api_key) > 12 else "***"
+        logger.debug(f"Using API key: {masked_key}")
+        logger.debug(f"API Base URL: {self.base_url or 'https://api.openai.com/v1 (default)'}")
 
         try:
             from openai import APIConnectionError, APITimeoutError, AuthenticationError, RateLimitError
