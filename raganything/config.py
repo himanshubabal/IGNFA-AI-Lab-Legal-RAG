@@ -27,7 +27,19 @@ class Config:
     def __init__(self):
         """Initialize configuration from environment variables."""
         if not self._initialized:
-            # Load environment variables from .env file
+            # Streamlit secrets are automatically available as environment variables
+            # but we also check for .env file for local development
+            
+            # Try loading Streamlit secrets first (if running in Streamlit)
+            try:
+                import streamlit as st
+                # Streamlit secrets are automatically loaded as environment variables
+                # when accessed via st.secrets, but we use os.getenv which works for both
+            except ImportError:
+                # Not running in Streamlit, continue with .env loading
+                pass
+            
+            # Load environment variables from .env file (for local development)
             env_path = Path(__file__).parent.parent / ".env"
             if env_path.exists():
                 load_dotenv(env_path)
