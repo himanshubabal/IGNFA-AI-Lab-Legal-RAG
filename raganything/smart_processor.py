@@ -198,10 +198,25 @@ class SmartProcessor:
                     doc_id=Path(doc_path).stem,
                 )
 
+                num_chunks = result.get("num_chunks", 0)
+                content_length = len(result.get("content", ""))
+                
+                # Log chunking info
+                logger.info(
+                    f"Document processed: {Path(doc_path).name} - "
+                    f"{num_chunks} chunks from {content_length} chars"
+                )
+                
+                if num_chunks == 1 and content_length > 1000:
+                    logger.warning(
+                        f"WARNING: Only 1 chunk for large document ({content_length} chars). "
+                        f"Check chunk_size and chunk_strategy settings."
+                    )
+
                 self.tracker.mark_processed(
                     file_path=doc_path,
                     doc_id=Path(doc_path).stem,
-                    num_chunks=result.get("num_chunks", 0),
+                    num_chunks=num_chunks,
                     metadata=result.get("metadata", {}),
                 )
 
@@ -228,10 +243,25 @@ class SmartProcessor:
                     doc_id=Path(doc_path).stem,
                 )
 
+                num_chunks = result.get("num_chunks", 0)
+                content_length = len(result.get("content", ""))
+                
+                # Log chunking info
+                logger.info(
+                    f"Document reprocessed: {Path(doc_path).name} - "
+                    f"{num_chunks} chunks from {content_length} chars"
+                )
+                
+                if num_chunks == 1 and content_length > 1000:
+                    logger.warning(
+                        f"WARNING: Only 1 chunk for large document ({content_length} chars). "
+                        f"Check chunk_size and chunk_strategy settings."
+                    )
+
                 self.tracker.mark_processed(
                     file_path=doc_path,
                     doc_id=Path(doc_path).stem,
-                    num_chunks=result.get("num_chunks", 0),
+                    num_chunks=num_chunks,
                     metadata=result.get("metadata", {}),
                 )
 
