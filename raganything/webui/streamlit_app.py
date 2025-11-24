@@ -285,6 +285,21 @@ def main():
         st.divider()
         st.header("🔄 Process Documents")
         
+        # Extract-only option
+        extract_only = st.checkbox(
+            "Extract text only (skip chunking/embedding)",
+            value=False,
+            help="Only extract text from documents, skip chunking and embedding. Useful for batch extraction.",
+        )
+        st.session_state.extract_only = extract_only
+        
+        force_extract = st.checkbox(
+            "Force re-extraction",
+            value=False,
+            help="Force re-extraction even if extracted file exists",
+        )
+        st.session_state.force_extract = force_extract
+        
         # Force reprocess option
         force_reprocess = st.checkbox(
             "Force reprocess all documents",

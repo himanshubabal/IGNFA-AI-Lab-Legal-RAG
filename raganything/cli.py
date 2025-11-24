@@ -68,6 +68,16 @@ def main():
         dest="output_flag_span",
         help="Disable output of verification files",
     )
+    parser.add_argument(
+        "--extract-only",
+        action="store_true",
+        help="Only extract text (skip chunking and embedding)",
+    )
+    parser.add_argument(
+        "--force-extract",
+        action="store_true",
+        help="Force re-extraction even if extracted file exists",
+    )
 
     args = parser.parse_args()
 
@@ -109,7 +119,17 @@ def main():
     elif args.command == "process-all":
         print(f"Processing all documents in: {args.documents_dir}")
         processor = SmartProcessor(documents_dir=args.documents_dir)
-        results = processor.process_all(force_reprocess=args.force)
+        results = processor.process_all(
+            force_reprocess=args.force,
+            extract_only=args.extract_only,
+            force_extract=args.force_extract,
+        )
+        
+        if args.extract_only:
+            print(f"\n✅ Text extraction complete for all documents.")
+            print(f"   Extracted files saved in output directory.")
+            print(f"   Run without --extract-only to process chunks and embeddings.")
+            sys.exit(0)
 
         print("\n" + "=" * 60)
         print("Processing Summary")

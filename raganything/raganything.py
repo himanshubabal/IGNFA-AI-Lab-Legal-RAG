@@ -92,6 +92,7 @@ class RAGAnything:
         output_dir: Optional[str] = None,
         doc_id: Optional[str] = None,
         output_flag_span: Optional[bool] = None,
+        skip_if_extracted_exists: bool = True,
         **parser_kwargs: Any
     ) -> Dict[str, Any]:
         """
@@ -101,17 +102,44 @@ class RAGAnything:
             file_path: Path to document
             output_dir: Optional output directory
             doc_id: Optional document ID
+            output_flag_span: Whether to output verification files (MinerU)
+            skip_if_extracted_exists: Skip parsing if extracted file already exists
             **parser_kwargs: Additional parser parameters
 
         Returns:
             Dictionary with parsed content and metadata
         """
         file_path = validate_file_path(file_path)
+        file_path_obj = Path(file_path)
 
         if output_dir:
-            output_dir = str(ensure_directory(Path(output_dir)))
+            output_dir = ensure_directory(Path(output_dir))
         else:
-            output_dir = str(self.config.output_dir)
+            output_dir = self.config.output_dir
+
+        # Check if extracted file already exists
+        extracted_file = output_dir / f"{file_path_obj.stem}_extracted.md"
+        
+        if skip_if_extracted_exists and extracted_file.exists():
+            logger.info(f"Found existing extracted file: {extracted_file.name}, skipping parsing")
+            print(f"📖 Loading existing extracted content from: {extracted_file.name}", flush=True)
+            
+            with open(extracted_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            
+            content_length = len(content)
+            print(f"✅ Loaded {content_length:,} characters from existing file", flush=True)
+            
+            return {
+                "content": content,
+                "format": "markdown",
+                "output_file": str(extracted_file),
+                "parser": self.parser.__class__.__name__.lower().replace("parser", ""),
+                "metadata": {
+                    "file_path": str(file_path),
+                    "extracted_from_cache": True,
+                },
+            }
 
         logger.info(f"Processing document: {file_path}")
 
@@ -120,7 +148,18 @@ class RAGAnything:
             parser_kwargs["output_flag_span"] = output_flag_span
 
         # Parse document
-        result = self.parser.parse(file_path=file_path, output_dir=output_dir, **parser_kwargs)
+        result = self.parser.parse(file_path=file_path, output_dir=str(output_dir), **parser_kwargs)
+
+        # Save extracted content to standardized file
+        content = result.get("content", "")
+        if content:
+            extracted_file = output_dir / f"{file_path_obj.stem}_extracted.md"
+            logger.info(f"Saving extracted content to: {extracted_file}")
+            with open(extracted_file, "w", encoding="utf-8") as f:
+                f.write(content)
+            result["output_file"] = str(extracted_file)
+            result["extracted_file"] = str(extracted_file)
+            print(f"💾 Saved extracted content to: {extracted_file.name}", flush=True)
 
         # Add document ID if provided
         if doc_id:
@@ -136,6 +175,8 @@ class RAGAnything:
         display_stats: bool = True,
         split_by_character: Optional[str] = None,
         output_flag_span: Optional[bool] = None,
+        extract_only: bool = False,
+        skip_if_extracted_exists: bool = True,
         **parser_kwargs: Any
     ) -> Dict[str, Any]:
         """
@@ -147,6 +188,9 @@ class RAGAnything:
             doc_id: Optional document ID
             display_stats: Whether to display content statistics
             split_by_character: Optional character to split text by
+            output_flag_span: Whether to output verification files (MinerU)
+            extract_only: If True, only extract text (skip chunking/embedding)
+            skip_if_extracted_exists: Skip parsing if extracted file already exists
             **parser_kwargs: Additional parser parameters (lang, device, etc.)
 
         Returns:
@@ -157,8 +201,20 @@ class RAGAnything:
             file_path=file_path,
             output_dir=output_dir,
             doc_id=doc_id,
+            output_flag_span=output_flag_span,
+            skip_if_extracted_exists=skip_if_extracted_exists,
             **parser_kwargs
         )
+        
+        # If extract_only, return early after saving extracted content
+        if extract_only:
+            logger.info(f"Extract-only mode: skipping chunking and embedding")
+            print(f"✅ Text extraction complete (chunking/embedding skipped)", flush=True)
+            return {
+                **parse_result,
+                "extract_only": True,
+                "num_chunks": 0,
+            }
 
         content = parse_result.get("content", "")
         content_length = len(content) if content else 0
