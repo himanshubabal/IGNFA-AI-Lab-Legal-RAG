@@ -251,13 +251,19 @@ class ChromaVectorStore(BaseVectorStore):
         # Prepare metadatas
         if metadatas is None:
             metadatas = [{}] * len(documents)
+        
+        # Clean metadatas: Remove None values (ChromaDB doesn't accept None)
+        cleaned_metadatas = []
+        for meta in metadatas:
+            cleaned_meta = {k: v for k, v in meta.items() if v is not None}
+            cleaned_metadatas.append(cleaned_meta)
 
         # Add to collection
         self.collection.add(
             ids=ids,
             documents=documents,
             embeddings=embeddings,
-            metadatas=metadatas,
+            metadatas=cleaned_metadatas,
         )
 
         return ids
@@ -417,8 +423,12 @@ class ContentProcessor:
             chunk_meta.update({
                 "chunk_index": i,
                 "chunk_id": chunk_id,
-                "doc_id": doc_id,
             })
+            # Only add doc_id if it's not None
+            if doc_id is not None:
+                chunk_meta["doc_id"] = doc_id
+            # Remove None values (ChromaDB doesn't accept None)
+            chunk_meta = {k: v for k, v in chunk_meta.items() if v is not None}
             metadatas.append(chunk_meta)
 
         # Store in vector database

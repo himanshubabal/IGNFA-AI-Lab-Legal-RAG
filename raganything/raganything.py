@@ -165,8 +165,12 @@ class RAGAnything:
 
         # Process and store in vector database
         metadata = parse_result.get("metadata", {})
-        metadata["file_path"] = file_path
-        metadata["parser"] = parse_result.get("parser", "unknown")
+        # Clean metadata: remove None values and ensure all values are valid
+        metadata = {k: v for k, v in metadata.items() if v is not None}
+        metadata["file_path"] = str(file_path)  # Ensure string type
+        parser_name = parse_result.get("parser", "unknown")
+        if parser_name:
+            metadata["parser"] = parser_name
 
         chunk_ids = self.processor.process_and_store(
             content=content,
