@@ -33,10 +33,14 @@ class Config:
             # Try loading Streamlit secrets first (if running in Streamlit)
             try:
                 import streamlit as st
-                # Streamlit secrets are automatically loaded as environment variables
-                # when accessed via st.secrets, but we use os.getenv which works for both
-            except ImportError:
-                # Not running in Streamlit, continue with .env loading
+                # Streamlit secrets are available via st.secrets - merge them into os.environ
+                # so os.getenv() can access them
+                if hasattr(st, 'secrets') and st.secrets:
+                    for key, value in st.secrets.items():
+                        if key not in os.environ:
+                            os.environ[key] = str(value)
+            except (ImportError, AttributeError):
+                # Not running in Streamlit or secrets not available, continue with .env loading
                 pass
             
             # Load environment variables from .env file (for local development)
