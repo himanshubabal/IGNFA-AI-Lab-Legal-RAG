@@ -226,6 +226,36 @@ def main():
 
         st.divider()
         
+        # API Configuration Diagnostics
+        st.subheader("🔍 API Configuration")
+        config = get_config()
+        if st.button("🔍 Test API Connection"):
+            try:
+                import os
+                api_key = config.openai_api_key or os.getenv("OPENAI_API_KEY")
+                base_url = config.openai_base_url or os.getenv("OPENAI_BASE_URL") or "https://api.openai.com/v1"
+                
+                if not api_key:
+                    st.error("❌ OPENAI_API_KEY not found!")
+                    st.info("Please configure it in Streamlit secrets or .env file")
+                else:
+                    masked_key = f"{api_key[:8]}...{api_key[-4:]}" if len(api_key) > 12 else "***"
+                    st.info(f"✅ API Key found: {masked_key}")
+                    st.info(f"📍 Base URL: {base_url}")
+                    
+                    # Test connection
+                    with st.spinner("Testing connection to OpenAI API..."):
+                        from openai import OpenAI
+                        client = OpenAI(api_key=api_key, base_url=base_url if base_url else None)
+                        # Try a simple request
+                        response = client.models.list()
+                        st.success("✅ Connection successful! OpenAI API is accessible.")
+            except Exception as e:
+                st.error(f"❌ Connection test failed: {str(e)}")
+                st.info("💡 Please check:\n1. Your internet connection\n2. API key is valid\n3. Network/firewall settings")
+        
+        st.divider()
+        
         # Embedding Model Configuration
         st.subheader("🔢 Embedding Model")
         config = get_config()
