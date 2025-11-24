@@ -532,6 +532,8 @@ def main():
                                 result = st.session_state.rag.process_document_complete(
                                     file_path=str(file_path),
                                     doc_id=file_path.stem,
+                                    extract_only=st.session_state.get("extract_only", False),
+                                    skip_if_extracted_exists=not st.session_state.get("force_extract", False),
                                 )
 
                                 st.success(
