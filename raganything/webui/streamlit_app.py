@@ -660,7 +660,7 @@ def main():
                 )
 
             df = pd.DataFrame(processed_data)
-            st.dataframe(df, use_container_width=True)
+            st.dataframe(df, width='stretch')
 
         # Unprocessed documents
         if status["unprocessed"]:
