@@ -29,6 +29,10 @@ class RAGAnything:
         chunk_overlap: int = 200,
         chunk_strategy: str = "character",
         vector_store_persist_dir: Optional[str] = None,
+        llm_model: Optional[str] = None,
+        llm_temperature: Optional[float] = None,
+        llm_top_p: Optional[float] = None,
+        llm_max_tokens: Optional[int] = None,
     ):
         """
         Initialize RAGAnything instance.
@@ -63,12 +67,20 @@ class RAGAnything:
             vector_store=vector_store,
         )
 
-        # Initialize query handler
+        # Initialize query handler with LLM configuration
         self.query_handler = RAGQuery(
             vector_store=self.processor.vector_store,
             api_key=self.config.openai_api_key,
             base_url=self.config.openai_base_url,
+            model=llm_model or self.config.llm_model,
+            temperature=llm_temperature if llm_temperature is not None else self.config.llm_temperature,
+            top_p=llm_top_p if llm_top_p is not None else self.config.llm_top_p,
+            max_tokens=llm_max_tokens if llm_max_tokens is not None else self.config.llm_max_tokens,
         )
+        
+        # Store config for query method
+        self.default_n_results = self.config.query_n_results
+        self.default_max_context_length = self.config.query_max_context_length
 
     def process_document(
         self,
@@ -177,8 +189,11 @@ class RAGAnything:
     def query(
         self,
         query: str,
-        n_results: int = 5,
-        max_context_length: int = 2000,
+        n_results: Optional[int] = None,
+        max_context_length: Optional[int] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None,
         **kwargs: Any
     ) -> Dict[str, Any]:
         """
@@ -186,8 +201,11 @@ class RAGAnything:
 
         Args:
             query: Query string
-            n_results: Number of results to retrieve
-            max_context_length: Maximum context length
+            n_results: Number of results to retrieve (uses config default if None)
+            max_context_length: Maximum context length (uses config default if None)
+            temperature: LLM temperature (uses config default if None)
+            top_p: LLM top_p (uses config default if None)
+            max_tokens: LLM max_tokens (uses config default if None)
             **kwargs: Additional query parameters
 
         Returns:
@@ -195,8 +213,11 @@ class RAGAnything:
         """
         return self.query_handler.query(
             query=query,
-            n_results=n_results,
-            max_context_length=max_context_length,
+            n_results=n_results or self.default_n_results,
+            max_context_length=max_context_length or self.default_max_context_length,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
             **kwargs
         )
 

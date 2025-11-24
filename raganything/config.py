@@ -38,6 +38,19 @@ class Config:
             # OpenAI configuration
             self.openai_api_key: Optional[str] = os.getenv("OPENAI_API_KEY")
             self.openai_base_url: Optional[str] = os.getenv("OPENAI_BASE_URL")
+            
+            # LLM configuration
+            self.llm_model: str = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
+            self.llm_temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.7"))
+            self.llm_top_p: float = float(os.getenv("LLM_TOP_P", "1.0"))
+            self.llm_max_tokens: Optional[int] = (
+                int(os.getenv("LLM_MAX_TOKENS")) if os.getenv("LLM_MAX_TOKENS") else None
+            )
+            
+            # Query configuration
+            self.query_n_results: int = int(os.getenv("QUERY_N_RESULTS", "5"))
+            self.query_max_context_length: int = int(os.getenv("QUERY_MAX_CONTEXT_LENGTH", "2000"))
+            self.query_min_score: float = float(os.getenv("QUERY_MIN_SCORE", "0.0"))
 
             # Output configuration
             output_dir = os.getenv("OUTPUT_DIR", "./output")

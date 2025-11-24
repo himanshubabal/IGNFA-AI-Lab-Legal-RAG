@@ -28,6 +28,9 @@ class RAGQuery:
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         model: str = "gpt-3.5-turbo",
+        temperature: float = 0.7,
+        top_p: float = 1.0,
+        max_tokens: Optional[int] = None,
     ):
         """
         Initialize RAG query handler.
@@ -37,11 +40,17 @@ class RAGQuery:
             api_key: OpenAI API key
             base_url: Optional base URL for API
             model: LLM model name
+            temperature: LLM temperature (0.0-2.0)
+            top_p: LLM top_p (0.0-1.0)
+            max_tokens: Maximum tokens for response
         """
         self.vector_store = vector_store
         self.api_key = api_key
         self.base_url = base_url
         self.model = model
+        self.temperature = temperature
+        self.top_p = top_p
+        self.max_tokens = max_tokens
         self._client = None
 
     def _get_client(self):
@@ -94,7 +103,9 @@ class RAGQuery:
         max_context_length: int = 2000,
         system_prompt: Optional[str] = None,
         query_template: Optional[str] = None,
-        temperature: float = 0.7,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_tokens: Optional[int] = None,
         stream: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -135,7 +146,9 @@ class RAGQuery:
                 context=context,
                 system_prompt=system_prompt,
                 query_template=query_template,
-                temperature=temperature,
+                temperature=temperature if temperature is not None else self.temperature,
+                top_p=top_p if top_p is not None else self.top_p,
+                max_tokens=max_tokens if max_tokens is not None else self.max_tokens,
                 stream=stream,
             )
         except Exception as e:
@@ -164,6 +177,8 @@ class RAGQuery:
         system_prompt: Optional[str] = None,
         query_template: Optional[str] = None,
         temperature: float = 0.7,
+        top_p: float = 1.0,
+        max_tokens: Optional[int] = None,
         stream: bool = False,
     ) -> str:
         """
@@ -194,14 +209,20 @@ class RAGQuery:
             {"role": "user", "content": user_prompt},
         ]
 
+        # Prepare API call parameters
+        api_params = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+            "top_p": top_p,
+        }
+        if max_tokens is not None:
+            api_params["max_tokens"] = max_tokens
+
         if stream:
             # Stream response
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature,
-                stream=True,
-            )
+            api_params["stream"] = True
+            response = client.chat.completions.create(**api_params)
 
             answer_parts = []
             for chunk in response:
@@ -211,11 +232,7 @@ class RAGQuery:
             return "".join(answer_parts)
         else:
             # Non-streaming response
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=temperature,
-            )
+            response = client.chat.completions.create(**api_params)
 
             return response.choices[0].message.content or ""
 
@@ -263,7 +280,13 @@ class RAGQuery:
 
         # Generate answer
         try:
-            answer = self._generate_answer(query=query, context=context)
+            answer = self._generate_answer(
+                query=query,
+                context=context,
+                temperature=self.temperature,
+                top_p=self.top_p,
+                max_tokens=self.max_tokens,
+            )
         except Exception as e:
             logger.error(f"Error generating answer: {str(e)}")
             answer = f"Error generating answer: {str(e)}"

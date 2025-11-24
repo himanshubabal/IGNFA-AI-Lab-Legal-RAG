@@ -32,13 +32,30 @@ if "processor" not in st.session_state:
     st.session_state.processor = None
 if "auto_process" not in st.session_state:
     st.session_state.auto_process = True
+if "llm_model" not in st.session_state:
+    st.session_state.llm_model = "gpt-3.5-turbo"
+if "llm_temperature" not in st.session_state:
+    st.session_state.llm_temperature = 0.7
+if "llm_top_p" not in st.session_state:
+    st.session_state.llm_top_p = 1.0
+if "llm_max_tokens" not in st.session_state:
+    st.session_state.llm_max_tokens = None
+if "query_n_results" not in st.session_state:
+    st.session_state.query_n_results = 5
+if "query_max_context_length" not in st.session_state:
+    st.session_state.query_max_context_length = 2000
 
 
 def initialize_components():
     """Initialize RAG-Anything and SmartProcessor."""
     if st.session_state.rag is None:
         with st.spinner("Initializing RAG-Anything..."):
-            st.session_state.rag = RAGAnything()
+            st.session_state.rag = RAGAnything(
+                llm_model=st.session_state.llm_model,
+                llm_temperature=st.session_state.llm_temperature,
+                llm_top_p=st.session_state.llm_top_p,
+                llm_max_tokens=st.session_state.llm_max_tokens,
+            )
             st.session_state.processor = SmartProcessor(
                 documents_dir="documents",
                 raganything=st.session_state.rag,
@@ -56,6 +73,87 @@ def main():
     # Sidebar
     with st.sidebar:
         st.header("⚙️ Settings")
+        
+        # LLM Configuration
+        st.subheader("🤖 LLM Configuration")
+        llm_models = [
+            "gpt-4o",
+            "gpt-4o-mini",
+            "gpt-4-turbo",
+            "gpt-4",
+            "gpt-3.5-turbo",
+            "gpt-3.5-turbo-16k",
+        ]
+        current_model_index = (
+            llm_models.index(st.session_state.llm_model)
+            if st.session_state.llm_model in llm_models
+            else 4  # Default to gpt-3.5-turbo
+        )
+        llm_model = st.selectbox(
+            "LLM Model",
+            llm_models,
+            index=current_model_index,
+            help="Select the OpenAI model to use for generating answers",
+        )
+        st.session_state.llm_model = llm_model
+
+        llm_temperature = st.slider(
+            "Temperature",
+            0.0,
+            2.0,
+            st.session_state.llm_temperature,
+            0.1,
+            help="Controls randomness: 0 = deterministic, 2 = very creative",
+        )
+        st.session_state.llm_temperature = llm_temperature
+
+        llm_top_p = st.slider(
+            "Top P",
+            0.0,
+            1.0,
+            st.session_state.llm_top_p,
+            0.05,
+            help="Nucleus sampling: considers tokens with top_p probability mass",
+        )
+        st.session_state.llm_top_p = llm_top_p
+
+        llm_max_tokens = st.number_input(
+            "Max Tokens",
+            min_value=1,
+            max_value=8000,
+            value=st.session_state.llm_max_tokens or 2000,
+            step=100,
+            help="Maximum tokens in response (None = no limit)",
+        )
+        st.session_state.llm_max_tokens = llm_max_tokens if llm_max_tokens > 0 else None
+
+        st.divider()
+        
+        # Query Configuration
+        st.subheader("🔍 Query Configuration")
+        query_n_results = st.slider(
+            "Number of Results",
+            1,
+            20,
+            st.session_state.query_n_results,
+            help="Number of context chunks to retrieve",
+        )
+        st.session_state.query_n_results = query_n_results
+
+        query_max_context_length = st.slider(
+            "Max Context Length",
+            500,
+            8000,
+            st.session_state.query_max_context_length,
+            100,
+            help="Maximum context length in characters",
+        )
+        st.session_state.query_max_context_length = query_max_context_length
+
+        st.divider()
+        
+        # Parser Configuration
+        st.subheader("📄 Parser Configuration")
         parser = st.selectbox("Parser", ["mineru", "docling"], index=0)
         parse_method = st.selectbox("Parse Method", ["auto", "ocr", "txt"], index=0)
         chunk_size = st.slider("Chunk Size", 500, 2000, 1000)
@@ -68,6 +166,10 @@ def main():
                     parse_method=parse_method,
                     chunk_size=chunk_size,
                     chunk_overlap=chunk_overlap,
+                    llm_model=st.session_state.llm_model,
+                    llm_temperature=st.session_state.llm_temperature,
+                    llm_top_p=st.session_state.llm_top_p,
+                    llm_max_tokens=st.session_state.llm_max_tokens,
                 )
                 st.session_state.processor = SmartProcessor(
                     documents_dir="documents",
@@ -102,10 +204,82 @@ def main():
                 )
                 st.rerun()
 
-    # Main content area
-    tab1, tab2, tab3 = st.tabs(["📄 Documents", "💬 Chat", "📊 Status"])
+    # Main content area - Chat tab first (default)
+    tab1, tab2, tab3 = st.tabs(["💬 Chat", "📄 Documents", "📊 Status"])
 
     with tab1:
+        st.header("💬 Chat with Documents")
+
+        # Update RAG instance with current LLM settings if changed
+        if (
+            st.session_state.rag.query_handler.model != st.session_state.llm_model
+            or st.session_state.rag.query_handler.temperature != st.session_state.llm_temperature
+            or st.session_state.rag.query_handler.top_p != st.session_state.llm_top_p
+            or st.session_state.rag.query_handler.max_tokens != st.session_state.llm_max_tokens
+        ):
+            # Update query handler settings
+            st.session_state.rag.query_handler.model = st.session_state.llm_model
+            st.session_state.rag.query_handler.temperature = st.session_state.llm_temperature
+            st.session_state.rag.query_handler.top_p = st.session_state.llm_top_p
+            st.session_state.rag.query_handler.max_tokens = st.session_state.llm_max_tokens
+
+        # Display chat history
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+
+        for message in st.session_state.chat_history:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+        # Chat input
+        if prompt := st.chat_input("Ask a question about your documents..."):
+            # Add user message to history
+            st.session_state.chat_history.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # Generate response
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    try:
+                        result = st.session_state.rag.query(
+                            query=prompt,
+                            n_results=st.session_state.query_n_results,
+                            max_context_length=st.session_state.query_max_context_length,
+                            temperature=st.session_state.llm_temperature,
+                            top_p=st.session_state.llm_top_p,
+                            max_tokens=st.session_state.llm_max_tokens,
+                        )
+                        answer = result.get("answer", "I couldn't generate an answer.")
+                        sources = result.get("sources", [])
+
+                        st.markdown(answer)
+
+                        if sources:
+                            with st.expander("📚 Sources"):
+                                for source in sources:
+                                    st.text(f"- {source}")
+
+                        # Add assistant response to history
+                        st.session_state.chat_history.append(
+                            {"role": "assistant", "content": answer}
+                        )
+
+                    except Exception as e:
+                        error_msg = f"Error: {str(e)}"
+                        st.error(error_msg)
+                        st.session_state.chat_history.append(
+                            {"role": "assistant", "content": error_msg}
+                        )
+
+        # Clear chat button
+        col1, col2 = st.columns([1, 4])
+        with col1:
+            if st.button("🗑️ Clear Chat"):
+                st.session_state.chat_history = []
+                st.rerun()
+
+    with tab2:
         st.header("📄 Document Management")
 
         col1, col2 = st.columns([2, 1])
@@ -206,56 +380,6 @@ def main():
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"Error: {str(e)}")
-
-    with tab2:
-        st.header("💬 Chat with Documents")
-
-        # Display chat history
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
-
-        for message in st.session_state.chat_history:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-
-        # Chat input
-        if prompt := st.chat_input("Ask a question about your documents..."):
-            # Add user message to history
-            st.session_state.chat_history.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
-            # Generate response
-            with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
-                    try:
-                        result = st.session_state.rag.query(prompt, n_results=5)
-                        answer = result.get("answer", "I couldn't generate an answer.")
-                        sources = result.get("sources", [])
-
-                        st.markdown(answer)
-
-                        if sources:
-                            with st.expander("📚 Sources"):
-                                for source in sources:
-                                    st.text(f"- {source}")
-
-                        # Add assistant response to history
-                        st.session_state.chat_history.append(
-                            {"role": "assistant", "content": answer}
-                        )
-
-                    except Exception as e:
-                        error_msg = f"Error: {str(e)}"
-                        st.error(error_msg)
-                        st.session_state.chat_history.append(
-                            {"role": "assistant", "content": error_msg}
-                        )
-
-        # Clear chat button
-        if st.button("🗑️ Clear Chat"):
-            st.session_state.chat_history = []
-            st.rerun()
 
     with tab3:
         st.header("📊 Detailed Status")
