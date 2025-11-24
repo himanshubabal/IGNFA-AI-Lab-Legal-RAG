@@ -150,8 +150,10 @@ class EmbeddingGenerator:
                 client_kwargs = {}
                 if self.api_key:
                     client_kwargs["api_key"] = self.api_key
-                if self.base_url:
-                    client_kwargs["base_url"] = self.base_url
+                # Only set base_url if it's a non-empty string
+                if self.base_url and self.base_url.strip():
+                    client_kwargs["base_url"] = self.base_url.strip()
+                # If no base_url specified, OpenAI client will use default: https://api.openai.com/v1
 
                 self._client = OpenAI(**client_kwargs)
             except ImportError:
