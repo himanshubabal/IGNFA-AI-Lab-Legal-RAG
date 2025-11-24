@@ -195,7 +195,8 @@ class SmartProcessor:
         
         for doc_path in new_docs:
             current_doc += 1
-            print(f"\n[{current_doc}/{total_docs}] Processing: {doc_path.name}", flush=True)
+            doc_path_obj = Path(doc_path) if isinstance(doc_path, str) else doc_path
+            print(f"\n[{current_doc}/{total_docs}] Processing: {doc_path_obj.name}", flush=True)
             try:
                 logger.info(f"Processing new document: {doc_path}")
                 result = self.raganything.process_document_complete(
