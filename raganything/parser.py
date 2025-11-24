@@ -103,9 +103,51 @@ class MinerUParser(BaseParser):
 
         # Build MinerU command - use official 'mineru' command (from mineru[core] package)
         cmd_base = "mineru"
+        
+        # Check if MinerU is available (with more lenient timeout and error handling)
+        # MinerU might be slow to start, so we'll be more lenient
+        mineru_available = False
         try:
-            subprocess.run([cmd_base, "--version"], capture_output=True, check=True, timeout=5)
-        except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            # First, try a quick check if command exists
+            result = subprocess.run(
+                ["which", "mineru"] if sys.platform != "win32" else ["where", "mineru"],
+                capture_output=True,
+                timeout=2,
+            )
+            if result.returncode == 0:
+                mineru_available = True
+                logger.debug("MinerU command found in PATH")
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+        
+        # If which/where didn't work, try importing the Python module
+        if not mineru_available:
+            try:
+                import mineru
+                mineru_available = True
+                logger.debug("MinerU Python module found")
+            except ImportError:
+                pass
+        
+        # If still not found, try running mineru --version (with longer timeout)
+        if not mineru_available:
+            try:
+                result = subprocess.run(
+                    [cmd_base, "--version"],
+                    capture_output=True,
+                    check=False,  # Don't raise on error
+                    timeout=15,  # Longer timeout for slow systems
+                )
+                if result.returncode == 0:
+                    mineru_available = True
+                    logger.debug("MinerU version check successful")
+            except (FileNotFoundError, subprocess.TimeoutExpired):
+                # If it times out, we'll still try to use it (might just be slow)
+                logger.warning("MinerU version check timed out, but will attempt to use it")
+                mineru_available = True  # Assume it's available if command exists
+        
+        # Only raise error if we're really sure it's not available
+        if not mineru_available:
             raise RuntimeError(
                 "MinerU not found. Please install MinerU:\n"
                 "  pip install uv\n"
