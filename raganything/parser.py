@@ -9,6 +9,7 @@ import json
 import subprocess
 import sys
 import logging
+import platform
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -109,8 +110,9 @@ class MinerUParser(BaseParser):
         mineru_available = False
         try:
             # First, try a quick check if command exists
+            check_cmd = ["which", "mineru"] if platform.system() != "Windows" else ["where", "mineru"]
             result = subprocess.run(
-                ["which", "mineru"] if sys.platform != "win32" else ["where", "mineru"],
+                check_cmd,
                 capture_output=True,
                 timeout=2,
             )
