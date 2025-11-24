@@ -79,7 +79,7 @@ if "query_max_context_length" not in st.session_state:
 
 
 def initialize_components():
-    """Initialize RAG-Anything and SmartProcessor."""
+    """Initialize AI Lab IGNFA - Legal RAG System and SmartProcessor."""
     if st.session_state.rag is None:
         with st.spinner("Initializing AI Lab IGNFA - Legal RAG System..."):
             st.session_state.rag = RAGAnything(
