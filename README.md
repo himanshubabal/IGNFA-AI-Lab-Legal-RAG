@@ -81,24 +81,39 @@ print(f"Sources: {answer['sources']}")
 ### Using the Web UI
 
 ```bash
-# Start Streamlit web interface
-streamlit run raganything/webui/streamlit_app.py
+# Launch web UI with auto-processing (recommended)
+python run_ui.py
 
 # Or use the CLI
 python -m raganything.cli ui
 ```
 
+The web UI includes:
+- 📄 Document management (upload, remove, view status)
+- 🔄 Automatic processing of new/updated documents
+- 💬 Chat interface with your documents
+- 📊 Document status dashboard
+
 ### Using the CLI
 
 ```bash
-# Process a document
+# Process a single document
 python -m raganything.cli process --file document.pdf
+
+# Process all documents in documents/ directory (smart processing)
+python -m raganything.cli process-all
+
+# Check document processing status
+python -m raganything.cli status
 
 # Query the knowledge base
 python -m raganything.cli query --query "What is this about?"
 
 # Launch web UI
 python -m raganything.cli ui
+
+# Or use the launch script (auto-processes on startup)
+python run_ui.py
 ```
 
 ## Configuration
