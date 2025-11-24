@@ -62,6 +62,7 @@ htmlcov/
 *.docx
 *.pptx
 *.xlsx
+documents/
 chroma_db/
 vector_store/
 

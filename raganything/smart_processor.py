@@ -40,6 +40,57 @@ class SmartProcessor:
         self.raganything = raganything or RAGAnything()
         self.tracker = DocumentTracker()
 
+    def _should_exclude_file(self, file_path: Path) -> bool:
+        """
+        Check if a file should be excluded from processing.
+        
+        Args:
+            file_path: Path to the file
+            
+        Returns:
+            True if file should be excluded, False otherwise
+        """
+        file_name = file_path.name.lower()
+        file_name_no_ext = file_path.stem.lower()
+        
+        # Exclude hidden files (starting with .)
+        if file_name.startswith('.'):
+            return True
+        
+        # Exclude common system files
+        excluded_names = {
+            '.ds_store',
+            'thumbs.db',
+            'desktop.ini',
+            '.gitkeep',
+            '.gitignore',
+        }
+        if file_name in excluded_names:
+            return True
+        
+        # Exclude README files (case-insensitive)
+        if file_name_no_ext in {'readme', 'read_me', 'read-me'}:
+            return True
+        
+        # Exclude LICENSE files
+        if file_name_no_ext in {'license', 'licence', 'copying'}:
+            return True
+        
+        # Exclude common documentation files
+        excluded_patterns = [
+            'readme',
+            'changelog',
+            'contributing',
+            'authors',
+            'credits',
+            'acknowledgments',
+        ]
+        for pattern in excluded_patterns:
+            if pattern in file_name_no_ext:
+                return True
+        
+        return False
+
     def _get_supported_files(self) -> List[Path]:
         """Get all supported files from documents directory."""
         if not self.documents_dir.exists():
@@ -49,6 +100,11 @@ class SmartProcessor:
         supported_files = []
         for file_path in self.documents_dir.rglob("*"):
             if file_path.is_file():
+                # Skip excluded files
+                if self._should_exclude_file(file_path):
+                    logger.debug(f"Excluding file: {file_path.name}")
+                    continue
+                
                 file_str = str(file_path)
                 if (
                     is_pdf(file_str)

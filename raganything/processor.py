@@ -404,6 +404,17 @@ class ContentProcessor:
         """
         # Chunk content
         chunks = self.chunk_text(content)
+        
+        # Log chunking info for debugging
+        logger.info(
+            f"Chunking content: {len(content)} chars -> {len(chunks)} chunks "
+            f"(strategy={self.chunk_strategy}, size={self.chunk_size}, overlap={self.chunk_overlap})"
+        )
+        if len(chunks) == 1 and len(content) > self.chunk_size:
+            logger.warning(
+                f"Only 1 chunk created for {len(content)} char document! "
+                f"This may indicate a chunking issue."
+            )
 
         # Generate chunk IDs
         chunk_ids = []
@@ -415,6 +426,8 @@ class ContentProcessor:
                 chunk_id = f"chunk_{chunk_hash}_{i}"
 
             chunk_ids.append(chunk_id)
+        
+        logger.info(f"Generated {len(chunk_ids)} chunk IDs for document: {doc_id}")
 
         # Prepare metadatas
         metadatas = []

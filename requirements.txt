@@ -7,8 +7,8 @@ aiofiles>=23.0.0
 typing-extensions>=4.0.0
 
 # Optional: Parser dependencies
-# magic-pdf  # MinerU parser (install separately if needed)
-# docling    # Docling parser (install separately if needed)
+magic-pdf  # MinerU parser (install separately if needed)
+docling    # Docling parser (install separately if needed)
 
 # Optional: Extended format support
 # Pillow>=10.0.0      # For extended image formats (install with: pip install raganything[image])
@@ -16,6 +16,7 @@ typing-extensions>=4.0.0
 
 # Optional: UI support
 # streamlit>=1.28.0   # For web UI (install with: pip install raganything[ui])
+streamlit
 
 # Development dependencies (install with: pip install raganything[dev])
 # pytest>=7.0.0
