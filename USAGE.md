@@ -96,6 +96,53 @@ results = batch_processor.process_directory(
 print(f"Processed {results['successful']} documents")
 ```
 
+## Custom Prompts
+
+You can customize the system prompt used by the LLM by creating a `prompt.md` file in the project root.
+
+### Creating a Custom Prompt
+
+1. Create a file named `prompt.md` in the project root directory
+2. Write your custom system prompt in the file
+3. The prompt will be automatically loaded and used for all queries
+
+Example `prompt.md`:
+
+```markdown
+# Custom System Prompt
+
+You are a helpful assistant that answers questions based on provided context from documents.
+
+## Instructions
+
+- Provide accurate answers based on the context
+- Cite sources when possible
+- Say "I don't know" if the answer is not in the context
+- Be concise and clear
+- Use the context to provide detailed and accurate responses
+```
+
+### Managing Prompts in Web UI
+
+The web UI provides a section in the sidebar to:
+- View the current prompt (default or custom)
+- Edit the prompt directly in the UI
+- Save changes to `prompt.md`
+- Reload the prompt after editing
+
+### Configuration
+
+You can specify a custom prompt file path in `.env`:
+
+```env
+PROMPT_FILE=prompt.md  # Default: prompt.md
+```
+
+The system will look for the prompt file in:
+1. The path specified in `PROMPT_FILE`
+2. The project root directory
+3. The current working directory
+
 ## Configuration
 
 ### Environment Variables (.env)
