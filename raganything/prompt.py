@@ -177,8 +177,14 @@ class ContextFormatter:
             if show_scores:
                 chunk_text = f"[Score: {score:.3f}] {chunk_text}"
 
-            if "source" in metadata:
-                chunk_text = f"[Source: {metadata['source']}]\n{chunk_text}"
+            # Try multiple fields for source: source, doc_id, file_path
+            source = (
+                metadata.get("source") or 
+                metadata.get("doc_id") or 
+                (Path(metadata.get("file_path", "")).stem if metadata.get("file_path") else None) or
+                "Unknown"
+            )
+            chunk_text = f"[Source: {source}]\n{chunk_text}"
 
             if current_length + len(chunk_text) > max_length:
                 break
