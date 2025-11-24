@@ -2,11 +2,27 @@
 
 ## Python Version Requirements
 
-**Recommended: Python 3.12**
+**Recommended: Python 3.11 or 3.12**
 
-RAG-Anything is designed to work with Python 3.12. Some dependencies (notably ChromaDB's `onnxruntime`) may not be available for newer Python versions (e.g., Python 3.14).
+RAG-Anything is designed to work with Python 3.11 or 3.12. Some dependencies (notably ChromaDB's `onnxruntime`) may not be available for newer Python versions (e.g., Python 3.14).
 
-### Installing Python 3.12
+### Installing Python 3.11
+
+#### macOS (using Homebrew)
+```bash
+brew install python@3.11
+```
+
+#### Linux (using apt)
+```bash
+sudo apt update
+sudo apt install python3.11 python3.11-venv
+```
+
+#### Windows
+Download Python 3.11 from [python.org](https://www.python.org/downloads/)
+
+### Installing Python 3.12 (Alternative)
 
 #### macOS (using Homebrew)
 ```bash
@@ -40,8 +56,8 @@ The script will:
 ### Manual Setup
 
 ```bash
-# Create virtual environment with Python 3.12
-python3.12 -m venv venv
+# Create virtual environment with Python 3.11 (or 3.12)
+python3.11 -m venv venv
 
 # Activate virtual environment
 source venv/bin/activate  # On macOS/Linux
@@ -89,7 +105,7 @@ pip install streamlit
 
 ### Issue: `onnxruntime` not found
 
-**Solution**: Use Python 3.12 or 3.11. Python 3.14 is not yet supported by onnxruntime.
+**Solution**: Use Python 3.11 or 3.12. Python 3.14 is not yet supported by onnxruntime.
 
 ### Issue: ChromaDB dependency conflicts
 
@@ -114,7 +130,7 @@ After installation, verify the setup:
 source venv/bin/activate
 
 # Check Python version
-python --version  # Should show Python 3.12.x
+python --version  # Should show Python 3.11.x or 3.12.x
 
 # Test import
 python -c "from raganything import RAGAnything; print('Installation successful!')"
