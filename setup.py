@@ -35,7 +35,7 @@ setup(
     install_requires=[
         "python-dotenv>=1.0.0",
         "openai>=1.0.0",
-        "chromadb>=0.4.0",
+        "chromadb>=0.5.0",
         "pydantic>=2.0.0",
         "aiofiles>=23.0.0",
         "typing-extensions>=4.0.0",

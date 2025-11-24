@@ -9,12 +9,19 @@ echo "Setting up Python virtual environment for RAG-Anything..."
 if command -v python3.12 &> /dev/null; then
     PYTHON_CMD="python3.12"
     echo "Found Python 3.12"
+    PYTHON_VERSION=$($PYTHON_CMD --version)
+    echo "Using: $PYTHON_VERSION"
 elif python3 --version | grep -q "3.12"; then
     PYTHON_CMD="python3"
     echo "Found Python 3.12 via python3"
+    PYTHON_VERSION=$(python3 --version)
+    echo "Using: $PYTHON_VERSION"
 else
     echo "Warning: Python 3.12 not found. Using available Python 3 version."
     PYTHON_CMD="python3"
+    PYTHON_VERSION=$(python3 --version)
+    echo "Using: $PYTHON_VERSION"
+    echo "Note: Some dependencies may require Python 3.12. Consider installing Python 3.12."
 fi
 
 # Create virtual environment
