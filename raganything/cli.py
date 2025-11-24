@@ -76,9 +76,35 @@ def main():
             print("Error: --file is required for 'process' command")
             sys.exit(1)
 
+        from raganything.document_tracker import DocumentTracker
+        from pathlib import Path
+        
         rag = RAGAnything(parser=args.parser)
-        result = rag.process_document_complete(file_path=args.file, output_dir=args.output_dir)
-        print(f"Processed: {result.get('num_chunks', 0)} chunks created")
+        tracker = DocumentTracker()
+        
+        # Pass output_flag_span if specified
+        parser_kwargs = {}
+        if args.output_flag_span is not None and args.parser == "mineru":
+            parser_kwargs["output_flag_span"] = args.output_flag_span
+        
+        result = rag.process_document_complete(
+            file_path=args.file, 
+            output_dir=args.output_dir,
+            **parser_kwargs
+        )
+        
+        # Update document tracker
+        num_chunks = result.get('num_chunks', 0)
+        doc_id = Path(args.file).stem
+        tracker.mark_processed(
+            file_path=args.file,
+            doc_id=doc_id,
+            num_chunks=num_chunks,
+            metadata=result.get("metadata", {}),
+        )
+        
+        print(f"Processed: {num_chunks} chunks created")
+        print(f"✅ Document tracked: {Path(args.file).name}")
 
     elif args.command == "process-all":
         print(f"Processing all documents in: {args.documents_dir}")
