@@ -10,8 +10,33 @@ __version__ = "0.1.0"
 __author__ = "RAG-Anything Contributors"
 
 from raganything.raganything import RAGAnything
+from raganything.config import get_config, Config
+from raganything.parser import ParserFactory, MinerUParser, DoclingParser
+from raganything.processor import ContentProcessor, TextChunker, EmbeddingGenerator
+from raganything.query import RAGQuery
+from raganything.modalprocessors import (
+    ImageProcessor,
+    TableProcessor,
+    EquationProcessor,
+    GenericProcessor,
+    get_processor,
+)
 
 __all__ = [
     "RAGAnything",
+    "get_config",
+    "Config",
+    "ParserFactory",
+    "MinerUParser",
+    "DoclingParser",
+    "ContentProcessor",
+    "TextChunker",
+    "EmbeddingGenerator",
+    "RAGQuery",
+    "ImageProcessor",
+    "TableProcessor",
+    "EquationProcessor",
+    "GenericProcessor",
+    "get_processor",
 ]
 
