@@ -177,6 +177,11 @@ class EmbeddingGenerator:
         if not texts:
             return []
 
+        import sys
+        num_texts = len(texts)
+        print(f"🔢 Generating embeddings for {num_texts} chunks (model: {model})...", flush=True)
+        logger.info(f"🔢 Generating embeddings for {num_texts} chunks using {model}")
+
         client = self._get_client()
 
         try:
@@ -185,10 +190,14 @@ class EmbeddingGenerator:
                 input=texts,
             )
 
-            return [item.embedding for item in response.data]
+            embeddings = [item.embedding for item in response.data]
+            print(f"✅ Generated {len(embeddings)} embeddings", flush=True)
+            logger.info(f"✅ Successfully generated {len(embeddings)} embeddings")
+            return embeddings
 
         except Exception as e:
-            logger.error(f"Error generating embeddings: {str(e)}")
+            logger.error(f"❌ Error generating embeddings: {str(e)}")
+            print(f"❌ Error generating embeddings: {str(e)}", flush=True)
             raise RuntimeError(f"Failed to generate embeddings: {str(e)}") from e
 
 
