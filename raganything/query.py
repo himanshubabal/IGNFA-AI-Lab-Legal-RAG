@@ -161,7 +161,13 @@ class RAGQuery:
         sources = []
         for result in search_results:
             metadata = result.get("metadata", {})
-            source = metadata.get("source") or metadata.get("doc_id", "Unknown")
+            # Try multiple fields for source: source, doc_id, file_path
+            source = (
+                metadata.get("source") or 
+                metadata.get("doc_id") or 
+                (Path(metadata.get("file_path", "")).stem if metadata.get("file_path") else None) or
+                "Unknown"
+            )
             if source not in sources:
                 sources.append(source)
 
@@ -306,7 +312,13 @@ class RAGQuery:
         scores = []
         for result in search_results:
             metadata = result.get("metadata", {})
-            source = metadata.get("source") or metadata.get("doc_id", "Unknown")
+            # Try multiple fields for source: source, doc_id, file_path
+            source = (
+                metadata.get("source") or 
+                metadata.get("doc_id") or 
+                (Path(metadata.get("file_path", "")).stem if metadata.get("file_path") else None) or
+                "Unknown"
+            )
             score = result.get("score", 0.0)
 
             source_info = {

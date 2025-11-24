@@ -128,7 +128,13 @@ class ContextFormatter:
             if "metadata" in chunk and chunk["metadata"]:
                 # Add metadata as citation
                 metadata = chunk["metadata"]
-                source = metadata.get("source", "Unknown")
+                # Try multiple fields for source: source, doc_id, file_path
+                source = (
+                    metadata.get("source") or 
+                    metadata.get("doc_id") or 
+                    (Path(metadata.get("file_path", "")).stem if metadata.get("file_path") else None) or
+                    "Unknown"
+                )
                 chunk_text = f"[Source: {source}]\n{content}"
 
             if current_length + len(chunk_text) > max_length:

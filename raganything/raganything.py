@@ -185,6 +185,13 @@ class RAGAnything:
         # Clean metadata: remove None values and ensure all values are valid
         metadata = {k: v for k, v in metadata.items() if v is not None}
         metadata["file_path"] = str(file_path)  # Ensure string type
+        
+        # Add source field for better citation (use document name without extension)
+        file_name = Path(file_path).stem  # Get filename without extension
+        metadata["source"] = file_name  # This will be used for citations
+        if doc_id:
+            metadata["doc_id"] = doc_id  # Also keep doc_id for backward compatibility
+        
         parser_name = parse_result.get("parser", "unknown")
         if parser_name:
             metadata["parser"] = parser_name
