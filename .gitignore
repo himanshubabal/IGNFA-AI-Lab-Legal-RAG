@@ -42,7 +42,9 @@ ENV/
 .env.local
 
 # Output directories
-output/
+output/*
+!output/chroma_db/
+!output/chroma_db/**
 *.log
 logs/
 
@@ -63,7 +65,7 @@ htmlcov/
 *.pptx
 *.xlsx
 documents/
-chroma_db/
+# chroma_db/ is now tracked via exception in "Output directories" section above
 vector_store/
 
 # Temporary files

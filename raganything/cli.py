@@ -87,7 +87,6 @@ def main():
             sys.exit(1)
 
         from raganything.document_tracker import DocumentTracker
-        from pathlib import Path
         
         rag = RAGAnything(parser=args.parser)
         tracker = DocumentTracker()

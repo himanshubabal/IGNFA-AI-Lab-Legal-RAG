@@ -1,0 +1,11 @@
+# Git LFS configuration for large files
+
+# Track SQLite database files in chroma_db directory with Git LFS
+output/chroma_db/** filter=lfs diff=lfs merge=lfs -text
+*.sqlite3 filter=lfs diff=lfs merge=lfs -text
+*.db filter=lfs diff=lfs merge=lfs -text
+
+# Track all files in chroma_db directory with Git LFS
+# This ensures any large files in chroma_db are handled by LFS
+output/chroma_db/* filter=lfs diff=lfs merge=lfs -text
+
