@@ -268,6 +268,10 @@ def main():
 
         st.divider()
         st.header("📊 Document Status")
+        # Ensure processor is initialized before accessing
+        if st.session_state.processor is None:
+            st.warning("⚠️ Processor not initialized. Please wait...")
+            st.stop()
         status = st.session_state.processor.get_document_status()
         st.metric("Total Files", status["total_files"])
         st.metric("Processed", len(status["processed"]))
@@ -308,6 +312,9 @@ def main():
         )
         
         if st.button("🔄 Process All Documents", type="primary"):
+            if st.session_state.processor is None:
+                st.error("⚠️ Processor not initialized. Please refresh the page.")
+                st.stop()
             with st.spinner("Processing all documents..."):
                 results = st.session_state.processor.process_all(
                     force_reprocess=force_reprocess,
@@ -334,6 +341,9 @@ def main():
             if st.button("🗑️ Reset All Data", type="secondary"):
                 if st.session_state.get("confirm_reset", False):
                     # Perform reset
+                    if st.session_state.rag is None or st.session_state.processor is None:
+                        st.error("⚠️ RAG system or processor not initialized. Please refresh the page.")
+                        st.stop()
                     with st.spinner("Clearing all data..."):
                         try:
                             # Clear vector store
@@ -431,6 +441,11 @@ def main():
     with tab1:
         st.header("💬 Chat with Documents")
 
+        # Ensure RAG is initialized
+        if st.session_state.rag is None:
+            st.error("⚠️ RAG system not initialized. Please refresh the page or check configuration.")
+            st.stop()
+
         # Update RAG instance with current LLM settings if changed
         if (
             st.session_state.rag.query_handler.model != st.session_state.llm_model
@@ -527,6 +542,9 @@ def main():
 
                     # Auto-process if enabled
                     if st.session_state.auto_process:
+                        if st.session_state.rag is None:
+                            st.error("⚠️ RAG system not initialized. Please refresh the page.")
+                            st.stop()
                         with st.spinner("Processing document..."):
                             try:
                                 result = st.session_state.rag.process_document_complete(
@@ -552,6 +570,9 @@ def main():
                 help="Reprocess all documents even if unchanged",
             )
             if st.button("🔄 Refresh & Process"):
+                if st.session_state.processor is None:
+                    st.error("⚠️ Processor not initialized. Please refresh the page.")
+                    st.stop()
                 with st.spinner("Scanning and processing..."):
                     results = st.session_state.processor.process_all(force_reprocess=force_reprocess_quick)
                     st.success(
@@ -569,6 +590,10 @@ def main():
 
         # Document list
         st.subheader("📋 Document List")
+        # Ensure processor is initialized
+        if st.session_state.processor is None:
+            st.error("⚠️ Processor not initialized. Please refresh the page.")
+            st.stop()
         status = st.session_state.processor.get_document_status()
 
         # Processed documents
@@ -604,6 +629,9 @@ def main():
                     st.write(f"📄 {Path(doc['path']).name}")
                 with col2:
                            if st.button("▶️ Process", key=f"process_{doc['path']}"):
+                               if st.session_state.rag is None:
+                                   st.error("⚠️ RAG system not initialized. Please refresh the page.")
+                                   st.stop()
                                with st.spinner("Processing..."):
                                    try:
                                        # Use options from session state
@@ -626,6 +654,10 @@ def main():
     with tab3:
         st.header("📊 Detailed Status")
 
+        # Ensure processor is initialized
+        if st.session_state.processor is None:
+            st.error("⚠️ Processor not initialized. Please refresh the page.")
+            st.stop()
         status = st.session_state.processor.get_document_status()
 
         col1, col2, col3, col4 = st.columns(4)
