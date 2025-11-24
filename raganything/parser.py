@@ -175,11 +175,14 @@ class MinerUParser(BaseParser):
             logger.error("MinerU parsing timed out")
             raise RuntimeError("MinerU parsing timed out after 1 hour")
         except FileNotFoundError:
-            logger.error("MinerU command not found. Please install MinerU.")
-            raise RuntimeError(
-                "MinerU not found. Please install MinerU: "
-                "https://github.com/HKUDS/MinerU"
-            ) from None
+            error_msg = (
+                "MinerU not found. Please install MinerU:\n"
+                "  pip install magic-pdf\n"
+                "  Or visit: https://github.com/HKUDS/MinerU\n\n"
+                "Alternatively, you can use Docling parser by setting PARSER=docling in .env"
+            )
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from None
 
 
 class DoclingParser(BaseParser):
@@ -273,6 +276,21 @@ class DoclingParser(BaseParser):
 
 class ParserFactory:
     """Factory for creating parser instances."""
+
+    @staticmethod
+    def check_mineru_available() -> bool:
+        """Check if MinerU is available in the system."""
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["mineru", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            return result.returncode == 0
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return False
 
     @staticmethod
     def create_parser(parser_type: Optional[str] = None, parse_method: str = "auto") -> BaseParser:

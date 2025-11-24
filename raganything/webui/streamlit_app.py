@@ -52,7 +52,8 @@ st.set_page_config(
     layout="wide",
 )
 
-# Initialize session state
+# Initialize session state with config defaults
+config = get_config()
 if "rag" not in st.session_state:
     st.session_state.rag = None
 if "processor" not in st.session_state:
@@ -60,17 +61,17 @@ if "processor" not in st.session_state:
 if "auto_process" not in st.session_state:
     st.session_state.auto_process = True
 if "llm_model" not in st.session_state:
-    st.session_state.llm_model = "gpt-3.5-turbo"
+    st.session_state.llm_model = config.llm_model  # Use config default
 if "llm_temperature" not in st.session_state:
-    st.session_state.llm_temperature = 0.7
+    st.session_state.llm_temperature = config.llm_temperature
 if "llm_top_p" not in st.session_state:
-    st.session_state.llm_top_p = 1.0
+    st.session_state.llm_top_p = config.llm_top_p
 if "llm_max_tokens" not in st.session_state:
-    st.session_state.llm_max_tokens = None
+    st.session_state.llm_max_tokens = config.llm_max_tokens
 if "query_n_results" not in st.session_state:
-    st.session_state.query_n_results = 5
+    st.session_state.query_n_results = config.query_n_results
 if "query_max_context_length" not in st.session_state:
-    st.session_state.query_max_context_length = 2000
+    st.session_state.query_max_context_length = config.query_max_context_length
 
 
 def initialize_components():
@@ -111,16 +112,19 @@ def main():
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-16k",
         ]
+        # Get default from config (which reads from .env)
+        config = get_config()
+        default_model = config.llm_model
         current_model_index = (
             llm_models.index(st.session_state.llm_model)
             if st.session_state.llm_model in llm_models
-            else 4  # Default to gpt-3.5-turbo
+            else (llm_models.index(default_model) if default_model in llm_models else 4)
         )
         llm_model = st.selectbox(
             "LLM Model",
             llm_models,
             index=current_model_index,
-            help="Select the OpenAI model to use for generating answers",
+            help=f"Select the OpenAI model to use for generating answers (default from .env: {default_model})",
         )
         st.session_state.llm_model = llm_model
 
