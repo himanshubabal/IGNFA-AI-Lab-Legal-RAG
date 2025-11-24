@@ -96,52 +96,50 @@ class MinerUParser(BaseParser):
         else:
             output_dir = ensure_directory(Path(output_dir))
 
-        # Build MinerU command (magic-pdf is the CLI command)
-        # Try 'magic-pdf' first, fallback to 'mineru' for compatibility
-        cmd_base = "magic-pdf"
-        is_magic_pdf = True
+        # Build MinerU command - use official 'mineru' command (from mineru[core] package)
+        # Try 'mineru' first (official), fallback to 'magic-pdf' for compatibility
+        cmd_base = "mineru"
+        is_official_mineru = True
         try:
             subprocess.run([cmd_base, "--version"], capture_output=True, check=True, timeout=5)
         except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            cmd_base = "mineru"  # Fallback to mineru if magic-pdf not found
-            is_magic_pdf = False
+            # Fallback to magic-pdf for backward compatibility
+            cmd_base = "magic-pdf"
+            is_official_mineru = False
+            try:
+                subprocess.run([cmd_base, "--version"], capture_output=True, check=True, timeout=5)
+            except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                raise RuntimeError(
+                    "MinerU not found. Please install MinerU:\n"
+                    "  pip install uv\n"
+                    "  uv pip install -U 'mineru[core]'\n"
+                    "Or visit: https://github.com/opendatalab/MinerU"
+                )
         
         # Build base command
-        if is_magic_pdf:
-            # magic-pdf uses: -p (path), -o (output-dir), -m (method)
+        if is_official_mineru:
+            # Official mineru command uses: -p (path), -o (output-dir), -m (method)
+            cmd = [cmd_base, "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
+            
+            # Add optional parameters (official mineru format)
+            if lang:
+                cmd.extend(["-l", lang])  # mineru uses -l for lang
+            if start_page is not None:
+                cmd.extend(["-s", str(start_page)])  # mineru uses -s for start
+            if end_page is not None:
+                cmd.extend(["-e", str(end_page)])  # mineru uses -e for end
+            # Note: Official mineru may not support all legacy parameters
+        else:
+            # Legacy magic-pdf command format (for backward compatibility)
             cmd = [cmd_base, "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
             
             # Add optional parameters (magic-pdf specific)
             if lang:
-                cmd.extend(["-l", lang])  # magic-pdf uses -l for lang
+                cmd.extend(["-l", lang])
             if start_page is not None:
-                cmd.extend(["-s", str(start_page)])  # magic-pdf uses -s for start
+                cmd.extend(["-s", str(start_page)])
             if end_page is not None:
-                cmd.extend(["-e", str(end_page)])  # magic-pdf uses -e for end
-            # Note: magic-pdf doesn't support: device, formula, table, backend, source, vlm_url
-        else:
-            # Original mineru command format (for compatibility)
-            cmd = [cmd_base, "-p", str(file_path), "-o", str(output_dir), "-m", self.parse_method]
-            
-            # Add optional parameters (mineru format)
-            if lang:
-                cmd.extend(["--lang", lang])
-            if device:
-                cmd.extend(["--device", device])
-            if start_page is not None:
-                cmd.extend(["--start-page", str(start_page)])
-            if end_page is not None:
-                cmd.extend(["--end-page", str(end_page)])
-            if not formula:
-                cmd.append("--no-formula")
-            if not table:
-                cmd.append("--no-table")
-            if backend:
-                cmd.extend(["-b", backend])
-            if source:
-                cmd.extend(["--source", source])
-            if vlm_url:
-                cmd.extend(["--vlm-url", vlm_url])
+                cmd.extend(["-e", str(end_page)])
 
         logger.info(f"Running MinerU parser: {' '.join(cmd)}")
 
@@ -444,7 +442,10 @@ class ParserFactory:
             if not ParserFactory.check_mineru_available():
                 logger.warning(
                     "MinerU not found. Falling back to Docling parser. "
-                    "Install MinerU with: pip install magic-pdf"
+                    "Install MinerU with:\n"
+                    "  pip install uv\n"
+                    "  uv pip install -U 'mineru[core]'\n"
+                    "See: https://github.com/opendatalab/MinerU"
                 )
                 # Fall back to Docling if MinerU is not available
                 return DoclingParser()

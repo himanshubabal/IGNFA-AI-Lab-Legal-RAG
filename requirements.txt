@@ -7,10 +7,11 @@ aiofiles>=23.0.0
 typing-extensions>=4.0.0
 
 # Optional: Parser dependencies
-magic-pdf  # MinerU parser (install separately if needed)
-# Note: magic-pdf requires additional dependencies:
-#   - ultralytics (for language detection)
-#   - Install with: pip install magic-pdf ultralytics
+# Official MinerU parser (recommended)
+# Install with: pip install uv && uv pip install -U "mineru[core]"
+# See: https://github.com/opendatalab/MinerU
+mineru[core]  # Official MinerU parser (install separately if needed)
+# Legacy: magic-pdf (older package, use mineru[core] instead)
 docling    # Docling parser (install separately if needed)
 
 # Optional: Extended format support
