@@ -113,15 +113,19 @@ class RAGAnything:
         file_path_obj = Path(file_path)
 
         if output_dir:
-            output_dir = ensure_directory(Path(output_dir))
+            base_output_dir = ensure_directory(Path(output_dir))
         else:
-            output_dir = self.config.output_dir
+            base_output_dir = self.config.output_dir
 
-        # Check if extracted file already exists
-        extracted_file = output_dir / f"{file_path_obj.stem}_extracted.md"
+        # Create document-specific output directory (e.g., output/FCA 1980/)
+        doc_output_dir = base_output_dir / file_path_obj.stem
+        doc_output_dir = ensure_directory(doc_output_dir)
+
+        # Check if extracted file already exists in document-specific directory
+        extracted_file = doc_output_dir / f"{file_path_obj.stem}_extracted.md"
         
         if skip_if_extracted_exists and extracted_file.exists():
-            logger.info(f"Found existing extracted file: {extracted_file.name}, skipping parsing")
+            logger.info(f"Found existing extracted file: {extracted_file}, skipping parsing")
             print(f"📖 Loading existing extracted content from: {extracted_file.name}", flush=True)
             
             with open(extracted_file, "r", encoding="utf-8") as f:
@@ -147,19 +151,19 @@ class RAGAnything:
         if output_flag_span is not None:
             parser_kwargs["output_flag_span"] = output_flag_span
 
-        # Parse document
-        result = self.parser.parse(file_path=file_path, output_dir=str(output_dir), **parser_kwargs)
+        # Parse document - use document-specific output directory
+        result = self.parser.parse(file_path=file_path, output_dir=str(doc_output_dir), **parser_kwargs)
 
-        # Save extracted content to standardized file
+        # Save extracted content to standardized file in document-specific directory
         content = result.get("content", "")
         if content:
-            extracted_file = output_dir / f"{file_path_obj.stem}_extracted.md"
+            extracted_file = doc_output_dir / f"{file_path_obj.stem}_extracted.md"
             logger.info(f"Saving extracted content to: {extracted_file}")
             with open(extracted_file, "w", encoding="utf-8") as f:
                 f.write(content)
             result["output_file"] = str(extracted_file)
             result["extracted_file"] = str(extracted_file)
-            print(f"💾 Saved extracted content to: {extracted_file.name}", flush=True)
+            print(f"💾 Saved extracted content to: {extracted_file.relative_to(base_output_dir)}", flush=True)
 
         # Add document ID if provided
         if doc_id:
