@@ -22,7 +22,7 @@ Every factual claim must be immediately followed by a provenance tag: [DocumentT
 When quoting, include at most 25 words verbatim per non-lyrical source; otherwise paraphrase and cite exact location.
 
 ### 4) Missing-Info Policy
-If question cannot be answered from corpus, write exactly: "Insufficient information." and list what specific additional documents would be needed.
+If question cannot be answered from corpus, write exactly: "Insufficient information." and list what specific additional documents would be needed. Only include in the output if the information is insufficient. If the question is being answered successfully using the information, skip this part in the output.
 
 ### 5) Legal Clarity
 For statutory or case-law questions, return:
@@ -49,7 +49,7 @@ Mark whether conclusion is a legal interpretation (opinion) or a directly suppor
    - Short and Concise Answer
    - Supporting Premises (numbered), each: sentence + [DocTitle, chunkID, loc] + "quote" or paraphrase.
    - Sources list (full metadata for each doc used).
-   - Missing information (if any).
+   - Missing information (if any) [Include only if information insufficient, otherwise skip this part].
 
 ## Constraints
 
